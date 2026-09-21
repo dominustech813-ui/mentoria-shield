@@ -20,3 +20,11 @@ window.sendCode = async function(resend=false){
     loginMsg('Não foi possível conectar ao Bot CDL. Tente novamente.');
   }
 };
+
+(()=>{
+  if(document.getElementById('roleEditorV23Script'))return;
+  const s=document.createElement('script');
+  s.id='roleEditorV23Script';
+  s.src='../creative-squad/role-editor-v23.js?v=23';
+  document.head.appendChild(s);
+})();
