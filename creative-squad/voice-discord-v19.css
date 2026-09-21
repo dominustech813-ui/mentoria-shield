@@ -1,0 +1,25 @@
+/* CDL voice UI inspired by modern community voice apps */
+#voices{display:flex;flex-direction:column;gap:3px}
+.dvChannel{border-radius:8px;overflow:hidden}
+.dvChannel.joined{background:#232428}
+.dvChannelButton{width:100%;display:flex;align-items:center;gap:8px;border:0;background:transparent!important;color:#b5bac1!important;padding:7px 8px!important;border-radius:6px!important;text-align:left;font-weight:700!important;min-height:34px}
+.dvChannelButton:hover{background:#2e3035!important;color:#f2f3f5!important}
+.dvChannelButton.joined{color:#fff!important;background:#35373c!important}
+.dvVoiceIcon{width:20px;text-align:center;opacity:.95}.dvChannelName{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dvMembers{padding:1px 5px 5px 28px;display:flex;flex-direction:column;gap:2px}.dvMembers.empty{display:none}
+.dvMember{display:flex;align-items:center;gap:8px;min-height:32px;padding:3px 6px;border-radius:5px;color:#949ba4;font-size:12px;font-weight:700}
+.dvMember:hover{background:#2e3035;color:#dbdee1}.dvMember.me{color:#f2f3f5}.dvMemberName{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dvMuted,.dvMic{font-size:11px;opacity:.8}
+.dvMiniAvatarWrap,.dvDockAvatarWrap,.dvAvatarWrap{position:relative;display:inline-block;flex:none}
+.dvMiniAvatar{width:26px;height:26px;border-radius:50%;object-fit:cover;background:#1e1f22}
+.dvMemberOnline,.dvOnline{position:absolute;right:-1px;bottom:-1px;border-radius:50%;background:#23a55a;border:3px solid #2b2d31}
+.dvMemberOnline{width:9px;height:9px}.dvOnline{width:12px;height:12px;border-color:#232428}
+.discordVoiceDock{position:fixed!important;left:14px!important;bottom:14px!important;width:300px!important;max-width:calc(100vw - 28px)!important;padding:0!important;border:1px solid #1e1f22!important;border-radius:12px!important;overflow:hidden!important;background:#232428!important;box-shadow:0 16px 45px #0008!important;color:#f2f3f5!important;z-index:1100!important}
+.dvConnection{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border-bottom:1px solid #1e1f22;background:#1e1f22}
+.dvConnection>div{display:flex;flex-direction:column;gap:2px;min-width:0}.dvConnectedLabel{font-size:10px;font-weight:900;color:#23a55a;letter-spacing:.08em}.dvConnection b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dvConnection small{display:block;color:#949ba4;font-size:10px}
+.dvDisconnect{border:0;width:34px;height:34px;border-radius:8px;background:#da373c;color:#fff;font-size:18px;cursor:pointer}.dvDisconnect:hover{filter:brightness(1.08)}
+.dvSelf{display:grid;grid-template-columns:42px minmax(0,1fr) 36px 36px;align-items:center;gap:8px;padding:10px 12px;background:#232428;border-bottom:1px solid #1e1f22}
+.dvAvatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#111214}.dvSelfText{display:flex;flex-direction:column;min-width:0}.dvSelfText b{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dvSelfText small{font-size:10px;color:#949ba4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dvIconBtn{border:0;width:34px;height:34px;border-radius:7px;background:#313338;color:#dbdee1;cursor:pointer;font-size:16px}.dvIconBtn:hover{background:#3f4147}.dvIconBtn.muted{background:#4e2b2e;color:#ffb5b9}
+.dvRoomMembersTitle{padding:8px 12px 4px;color:#949ba4;font-size:9px;font-weight:900;letter-spacing:.09em;background:#2b2d31}.dvPeople{padding:4px 8px 9px;background:#2b2d31;max-height:190px;overflow:auto}
+.dvDockMember{display:grid;grid-template-columns:36px minmax(0,1fr) 22px;align-items:center;gap:8px;padding:6px;border-radius:7px}.dvDockMember:hover{background:#35373c}.dvDockAvatar{width:34px;height:34px;border-radius:50%;object-fit:cover;background:#111214}.dvDockMember>span:nth-child(2){display:flex;flex-direction:column;min-width:0}.dvDockMember b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dvDockMember small{font-size:9px;color:#949ba4}.dvDockMic{font-size:11px}.dvEmptyRoom{padding:12px;text-align:center;color:#949ba4;font-size:11px}
+@media(max-width:700px){.discordVoiceDock{left:8px!important;bottom:8px!important;width:calc(100vw - 16px)!important;max-width:none!important}.dvMembers{padding-left:22px}}
