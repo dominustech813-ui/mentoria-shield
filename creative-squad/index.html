@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#07120a">
   <title>Creative Squad</title>
-  <link rel="icon" href="logo.svg">
+  <link rel="icon" href="logo.jpg">
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <section id="login" class="login card">
-  <div class="brand big"><img src="logo.svg"><div><span class="tag">MINECRAFT</span><h1>Creative Squad</h1></div></div>
+  <div class="brand big"><img src="logo.jpg"><div><span class="tag">MINECRAFT</span><h1>Creative Squad</h1></div></div>
   <div id="emailStep"><p>Digite seu e-mail para receber o código de acesso.</p><input id="email" type="email" placeholder="voce@email.com"><button class="btn green" onclick="sendCode()">Enviar código</button></div>
   <div id="codeStep" class="hidden"><p>Código enviado para <b id="codeEmail"></b></p><input id="code" class="otp" inputmode="numeric" maxlength="8" placeholder="000000"><div class="row"><button class="btn green" onclick="verifyCode()">Verificar</button><button class="btn dark" onclick="sendCode(true)">Reenviar</button><button class="btn dark" onclick="changeEmail()">Trocar e-mail</button></div></div>
   <div id="loginMsg" class="msg"></div>
@@ -20,11 +20,11 @@
 <section id="verify" class="verify hidden"><div id="verifyContent"></div></section>
 
 <div id="app" class="page hidden">
-  <header class="top card"><div class="brand"><img src="logo.svg"><div><strong>Creative Squad</strong><small>MINECRAFT COMMUNITY</small></div></div><div class="row"><span class="ok">✅ VERIFICADO</span><button class="btn dark" onclick="logout()">Sair</button></div></header>
+  <header class="top card"><div class="brand"><img src="logo.jpg"><div><strong>Creative Squad</strong><small>MINECRAFT COMMUNITY</small></div></div><div class="row"><span class="ok">✅ VERIFICADO</span><button class="btn dark" onclick="logout()">Sair</button></div></header>
   <nav class="tabs card"><button class="tab active" data-tab="home" onclick="tab('home')">🏠 Início</button><button class="tab" data-tab="chat" onclick="tab('chat')">💬 Conversas</button><button class="tab" data-tab="profile" onclick="tab('profile')">👤 Perfil</button><button id="rolesTab" class="tab admin hidden" data-tab="roles" onclick="tab('roles')">👑 Cargos</button></nav>
 
   <section id="home" class="view">
-    <div class="hero card"><div><span class="tag">CREATIVE SQUAD</span><h2>Creative<br>Squad</h2><p>Servidor privado com conversas, voz, perfis, imagens, figurinhas e cargos.</p><button class="btn green" onclick="tab('chat')">Abrir conversas</button></div><img src="logo.svg"></div>
+    <div class="hero card"><div><span class="tag">CREATIVE SQUAD</span><h2>Creative<br>Squad</h2><p>Servidor privado com conversas, voz, perfis, imagens, figurinhas e cargos.</p><button class="btn green" onclick="tab('chat')">Abrir conversas</button></div><img src="logo.jpg"></div>
     <div class="grid2"><div class="card box"><h3>🔒 Privacidade</h3><p>Administração e Reuniões Administrativas só aparecem para o administrador.</p></div><div class="card box"><h3 id="homeName">Membro CS</h3><p id="homeBio"></p><div id="homeRoles"></div></div></div>
   </section>
 
@@ -38,6 +38,15 @@
 </div>
 
 <div id="voiceDock" class="voiceDock hidden"><div class="row between"><div><b id="voiceTitle">🔊 Voz</b><small id="voiceStatus">Conectando...</small></div><button class="btn danger" onclick="leaveVoice()">Sair</button></div><div id="voicePeople" class="voicePeople"></div><button id="mute" class="btn dark full" onclick="toggleMute()">🎙️ Mutar</button><div id="audios" hidden></div></div>
+<script>
+window.addEventListener('error',function(e){
+  const el=e.target;
+  if(el && el.tagName==='IMG' && !el.dataset.csFallback){
+    el.dataset.csFallback='1';
+    el.src='logo.jpg';
+  }
+},true);
+</script>
 <script src="app.js"></script>
 </body>
 </html>
