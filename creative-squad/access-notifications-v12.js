@@ -2,6 +2,7 @@
   const q=id=>document.getElementById(id);
   const BRAND='Creative Dark Legends 2 COPA CDL';
   const SHORT='CDL';
+  const LOGO='../creative-squad/logo-cdl.svg';
   let notifSub=null,accessSub=null,guestSub=null,started=false,pendingTimer=null;
   const oldTab=window.tab;
   const oldEnter=window.enter;
@@ -33,6 +34,7 @@
     while(n=walker.nextNode())nodes.push(n);
     nodes.forEach(t=>{const p=t.parentElement;if(!p||['SCRIPT','STYLE','NOSCRIPT'].includes(p.tagName))return;const v=brandText(t.nodeValue);if(v!==t.nodeValue)t.nodeValue=v;});
     root.querySelectorAll?.('[alt]').forEach(el=>{el.alt=brandText(el.alt)});
+    root.querySelectorAll?.('img').forEach(img=>{if((img.getAttribute('src')||'').includes('logo'))img.src=LOGO;});
   }
 
   applyBranding();
