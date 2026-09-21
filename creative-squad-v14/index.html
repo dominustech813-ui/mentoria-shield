@@ -9,10 +9,10 @@
 <meta name="theme-color" content="#07120a">
 <title>Creative Squad</title>
 <link rel="icon" href="../creative-squad-v9/logo.jpg">
-<link rel="stylesheet" href="../creative-squad/styles.css?v=14">
+<link rel="stylesheet" href="../creative-squad/styles.css?v=15">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-.login .brand.big img{object-fit:cover}.loginMethods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 14px}.methodTab{border:1px solid #31523b;background:#09160e;color:#c7d5ca;border-radius:10px;padding:12px 10px;font-weight:900}.methodTab.active{background:#7cff35;color:#062000;border-color:#7cff35}.accessBox{margin-top:12px;padding:14px;border:1px solid #675d17;background:#211d08;border-radius:10px}.ticketBox{margin-top:10px;padding:14px;border:1px solid #31583d;background:#07140b;border-radius:10px;text-align:center}.ticketNumber{font-size:30px;font-weight:1000;letter-spacing:.08em;color:#ffe42f}.statusOk{color:#7cff35!important}.statusErr{color:#ffe42f!important}.full{width:100%}.altHelp{color:#a9b6ac;line-height:1.45}@media(max-width:520px){.loginMethods{grid-template-columns:1fr}}
+.login .brand.big img{object-fit:cover}.loginMethods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 14px}.methodTab{border:1px solid #31523b;background:#09160e;color:#c7d5ca;border-radius:10px;padding:12px 10px;font-weight:900}.methodTab.active{background:#7cff35;color:#062000;border-color:#7cff35}.accessBox{margin-top:12px;padding:14px;border:1px solid #675d17;background:#211d08;border-radius:10px}.ticketBox{margin-top:10px;padding:14px;border:1px solid #31583d;background:#07140b;border-radius:10px;text-align:center}.ticketNumber{font-size:30px;font-weight:1000;letter-spacing:.08em;color:#ffe42f}.statusOk{color:#7cff35!important}.statusErr{color:#ffe42f!important}.full{width:100%}.altHelp{color:#a9b6ac;line-height:1.45}.guestButton{font-size:15px;padding:14px}@media(max-width:520px){.loginMethods{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -37,17 +37,20 @@
 
   <div id="alternateStep" class="hidden">
     <div class="accessBox">
-      <h3>🛡️ Solicitar entrada</h3>
-      <p class="altHelp">Digite seu e-mail e envie uma solicitação ao ADM.</p>
-      <input id="altEmail" type="email" placeholder="voce@email.com" autocomplete="email">
-      <button id="requestBtn" class="btn yellow full" onclick="requestAccess()">Enviar solicitação ao ADM</button>
+      <h3>🛡️ Pedir entrada ao ADM</h3>
+      <p class="altHelp">Não precisa digitar e-mail. Toque no botão abaixo e o ADM receberá seu pedido com um ticket.</p>
+      <button id="guestRequestBtn" class="btn yellow full guestButton" onclick="requestGuestAccess()">🔔 Pedir ao ADM</button>
     </div>
   </div>
 
   <div id="waitingStep" class="hidden">
     <p>Solicitação enviada para o administrador.</p>
-    <div class="ticketBox"><div class="small">SEU TICKET É</div><div id="waitingTicket" class="ticketNumber">0000000</div><div id="waitingStatus" class="small">🔔 Notificação enviada. Esperando o ADM...</div></div>
-    <div class="row" style="margin-top:10px"><button class="btn dark" onclick="checkStatus(true)">Atualizar</button><button class="btn dark" onclick="showMethod('alt')">Voltar</button></div>
+    <div class="ticketBox">
+      <div class="small">SEU TICKET É</div>
+      <div id="waitingTicket" class="ticketNumber">0000000</div>
+      <div id="waitingStatus" class="small">⏳ Aguardando ADM. Isso pode demorar alguns instantes.</div>
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn dark" onclick="checkGuestStatus(true)">Atualizar</button></div>
   </div>
 
   <div id="codeStep" class="hidden">
@@ -62,27 +65,77 @@
 const SUPABASE_URL='https://yivgtvgyaalhlcxatbfc.supabase.co';
 const SUPABASE_KEY='sb_publishable_JSNYdrq-FFHQtZ0DO3sfVw_v93KOBjs';
 const ADMIN='theoccosta2020@gmail.com';
+const GUEST_STORE='cs_guest_ticket_v1';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-let pendingEmail='',ticket=null,poll=null;
+let pendingEmail='',poll=null,guest=null;
 const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function msg(t,ok=false){$('loginMsg').textContent=t||'';$('loginMsg').className='msg '+(ok?'statusOk':'statusErr')}
+function stopPoll(){if(poll){clearInterval(poll);poll=null}}
 function showMethod(method){
-  if(poll){clearInterval(poll);poll=null}
+  stopPoll();
   $('methodCode').classList.toggle('active',method==='code');$('methodAlt').classList.toggle('active',method==='alt');
-  $('emailStep').classList.toggle('hidden',method!=='code');$('alternateStep').classList.toggle('hidden',method!=='alt');$('waitingStep').classList.add('hidden');$('codeStep').classList.add('hidden');
-  if(method==='alt') $('altEmail').value=$('email').value||pendingEmail||$('altEmail').value; else $('email').value=$('altEmail').value||pendingEmail||$('email').value;msg('');
+  $('emailStep').classList.toggle('hidden',method!=='code');$('alternateStep').classList.toggle('hidden',method!=='alt');$('waitingStep').classList.add('hidden');$('codeStep').classList.add('hidden');msg('');
+  if(method==='alt'&&guest){showWaiting();checkGuestStatus(false)}
 }
 async function api(payload){const r=await fetch(SUPABASE_URL+'/functions/v1/send-cs-otp',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify(payload)});const j=await r.json().catch(()=>({}));return {ok:r.ok,data:j};}
 async function sendCode(resend=false){
   const email=(resend?pendingEmail:$('email').value.trim()).toLowerCase();if(!email||!email.includes('@'))return msg('Digite um e-mail válido.');pendingEmail=email;$('unauthorizedBox').classList.add('hidden');$('sendBtn').disabled=true;msg('Bot CS está verificando sua autorização...');
   try{const r=await api({action:'send_code',email});if(!r.ok){if(r.data?.code==='not_authorized'){$('unauthorizedBox').classList.remove('hidden');return msg('Você não tem autorização do site. Peça para um ADM autorizar sua entrada.');}return msg(r.data?.error||'Não foi possível enviar o código agora.');}$('emailStep').classList.add('hidden');$('alternateStep').classList.add('hidden');$('waitingStep').classList.add('hidden');$('codeStep').classList.remove('hidden');$('codeEmail').textContent=email;$('code').value='';msg('✅ Código enviado pelo Bot CS. Confira seu e-mail.',true);}catch(e){msg('Não foi possível conectar ao Bot CS. Tente novamente.')}finally{$('sendBtn').disabled=false}
 }
-async function requestAccess(){
-  const email=$('altEmail').value.trim().toLowerCase();if(!email||!email.includes('@'))return msg('Digite um e-mail válido.');if(!confirm('Deseja enviar uma solicitação para o ADM para sua entrada?'))return;pendingEmail=email;$('requestBtn').disabled=true;msg('Enviando solicitação para o ADM...');
-  try{const r=await api({action:'request_access',email});if(!r.ok)return msg(r.data?.error||'Não foi possível enviar a solicitação.');if(r.data?.authorized){showMethod('code');$('email').value=email;return sendCode(true);}ticket=Number(r.data.ticket);$('emailStep').classList.add('hidden');$('alternateStep').classList.add('hidden');$('codeStep').classList.add('hidden');$('waitingStep').classList.remove('hidden');$('waitingTicket').textContent=String(ticket);$('waitingStatus').textContent='🔔 Notificação enviada. Esperando o ADM...';msg('');poll=setInterval(()=>checkStatus(false),5000);}catch(e){msg('Não foi possível enviar a solicitação agora.')}finally{$('requestBtn').disabled=false}
+async function requestGuestAccess(){
+  if(guest){showWaiting();return checkGuestStatus(true)}
+  if(!confirm('Deseja enviar uma solicitação para o ADM para sua entrada?'))return;
+  $('guestRequestBtn').disabled=true;msg('Enviando solicitação para o ADM...');
+  try{
+    const r=await api({action:'guest_request'});
+    if(!r.ok)return msg(r.data?.error||'Não foi possível enviar a solicitação.');
+    guest={ticket:Number(r.data.ticket),request_key:String(r.data.request_key)};
+    localStorage.setItem(GUEST_STORE,JSON.stringify(guest));
+    showWaiting();
+    msg('');
+  }catch(e){msg('Não foi possível enviar a solicitação agora.')}finally{$('guestRequestBtn').disabled=false}
 }
-async function checkStatus(manual=false){if(!ticket||!pendingEmail)return;if(manual)$('waitingStatus').textContent='Atualizando status...';try{const r=await api({action:'request_status',email:pendingEmail,ticket});if(!r.ok)return;if(r.data.status==='approved'){if(poll){clearInterval(poll);poll=null}$('waitingStatus').innerHTML='✅ <b>Acesso autorizado!</b> Enviando código...';await sleep(700);$('email').value=pendingEmail;showMethod('code');sendCode(true);}else if(r.data.status==='denied'){if(poll){clearInterval(poll);poll=null}$('waitingStatus').innerHTML='❌ <b>Sua solicitação não foi autorizada.</b>';}else $('waitingStatus').textContent='⏳ Aguardando o ADM autorizar...';}catch(e){if(manual)$('waitingStatus').textContent='Falha ao atualizar status.'}}
-async function verifyCode(){const token=$('code').value.trim();if(token.length<6)return msg('Digite o código recebido no e-mail.');$('verifyBtn').disabled=true;msg('Verificando código...');const {data,error}=await sb.auth.verifyOtp({email:pendingEmail,token,type:'email'});$('verifyBtn').disabled=false;if(error||!data.user)return msg('Código inválido ou expirado.');const {data:allowed}=await sb.rpc('is_cs_authorized');if(!allowed){await sb.auth.signOut();showMethod('alt');$('altEmail').value=pendingEmail;return msg('Você ainda não está autorizado pelo ADM.');}let name=pendingEmail===ADMIN?'Theo':pendingEmail.split('@')[0];$('login').classList.add('hidden');$('verify').classList.remove('hidden');$('verifyContent').innerHTML='<div class="icon">✅</div><h2>VERIFICADO</h2>';await sleep(700);$('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo,<br>'+name.toUpperCase()+'!!</h2>';await sleep(900);location.replace('../creative-squad-v8/?login='+Date.now());}
-(async()=>{const {data}=await sb.auth.getSession();if(data.session?.user){const {data:allowed}=await sb.rpc('is_cs_authorized');if(allowed)location.replace('../creative-squad-v8/?session='+Date.now());else await sb.auth.signOut();}})();
+function showWaiting(){
+  if(!guest)return;
+  $('methodCode').classList.remove('active');$('methodAlt').classList.add('active');
+  $('emailStep').classList.add('hidden');$('alternateStep').classList.add('hidden');$('codeStep').classList.add('hidden');$('waitingStep').classList.remove('hidden');
+  $('waitingTicket').textContent=String(guest.ticket);
+  $('waitingStatus').textContent='⏳ Aguardando ADM. Isso pode demorar alguns instantes.';
+  stopPoll();poll=setInterval(()=>checkGuestStatus(false),4000);
+}
+async function checkGuestStatus(manual=false){
+  if(!guest)return;
+  if(manual)$('waitingStatus').textContent='Atualizando status...';
+  try{
+    const r=await api({action:'guest_status',ticket:guest.ticket,request_key:guest.request_key});
+    if(!r.ok){if(manual)$('waitingStatus').textContent=r.data?.error||'Não foi possível atualizar.';return}
+    if(r.data.status==='approved'){
+      stopPoll();$('waitingStatus').innerHTML='✅ <b>ADM autorizou sua entrada!</b> Entrando...';
+      const {data,error}=await sb.auth.signInWithPassword({email:r.data.guest_email,password:r.data.guest_password});
+      if(error||!data.user){$('waitingStatus').textContent='A entrada foi autorizada, mas não foi possível abrir o site. Toque em Atualizar.';return}
+      const {data:allowed}=await sb.rpc('is_cs_authorized');
+      if(!allowed){await sb.auth.signOut();$('waitingStatus').textContent='Aguardando liberação final do ADM...';return}
+      localStorage.removeItem(GUEST_STORE);guest=null;
+      $('login').classList.add('hidden');$('verify').classList.remove('hidden');
+      $('verifyContent').innerHTML='<div class="icon">✅</div><h2>AUTORIZADO</h2><p>Entrada liberada pelo ADM.</p>';await sleep(700);
+      $('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo à<br>Creative Squad!</h2>';await sleep(900);
+      location.replace('../creative-squad-v8/?guest='+Date.now()+'&v=15');
+    }else if(r.data.status==='denied'){
+      stopPoll();$('waitingStatus').innerHTML='❌ <b>O ADM não autorizou esta entrada.</b>';localStorage.removeItem(GUEST_STORE);guest=null;
+    }else $('waitingStatus').textContent='⏳ Aguardando ADM. Isso pode demorar alguns instantes.';
+  }catch(e){if(manual)$('waitingStatus').textContent='Falha ao atualizar status.'}
+}
+async function verifyCode(){
+  const token=$('code').value.trim();if(token.length<6)return msg('Digite o código recebido no e-mail.');$('verifyBtn').disabled=true;msg('Verificando código...');
+  const {data,error}=await sb.auth.verifyOtp({email:pendingEmail,token,type:'email'});$('verifyBtn').disabled=false;if(error||!data.user)return msg('Código inválido ou expirado.');
+  const {data:allowed}=await sb.rpc('is_cs_authorized');if(!allowed){await sb.auth.signOut();showMethod('alt');return msg('Você ainda não está autorizado pelo ADM.');}
+  let name=pendingEmail===ADMIN?'Theo':pendingEmail.split('@')[0];$('login').classList.add('hidden');$('verify').classList.remove('hidden');$('verifyContent').innerHTML='<div class="icon">✅</div><h2>VERIFICADO</h2>';await sleep(700);$('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo,<br>'+name.toUpperCase()+'!!</h2>';await sleep(900);location.replace('../creative-squad-v8/?login='+Date.now()+'&v=15');
+}
+(async()=>{
+  try{guest=JSON.parse(localStorage.getItem(GUEST_STORE)||'null')}catch{guest=null}
+  const {data}=await sb.auth.getSession();
+  if(data.session?.user){const {data:allowed}=await sb.rpc('is_cs_authorized');if(allowed)return location.replace('../creative-squad-v8/?session='+Date.now()+'&v=15');await sb.auth.signOut();}
+  if(guest){showWaiting();checkGuestStatus(false)}
+})();
 </script>
 </body></html>
