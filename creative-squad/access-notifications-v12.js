@@ -1,8 +1,55 @@
 (()=>{
   const q=id=>document.getElementById(id);
+  const BRAND='Creative Dark Legends 2 COPA CDL';
+  const SHORT='CDL';
   let notifSub=null,accessSub=null,guestSub=null,started=false,pendingTimer=null;
   const oldTab=window.tab;
   const oldEnter=window.enter;
+
+  function brandText(s){
+    return String(s??'')
+      .replace(/Creative Squad/g,BRAND)
+      .replace(/Bot CS/g,'Bot CDL')
+      .replace(/Membro CS/g,'Membro CDL')
+      .replace(/Carregadoria da CS/g,'Carregadoria da CDL')
+      .replace(/Poder Judiciário CS/g,'Poder Judiciário CDL')
+      .replace(/\bCS\b/g,SHORT);
+  }
+
+  function applyBranding(root=document){
+    document.title=BRAND;
+    try{
+      if(typeof textChannels!=='undefined'){
+        textChannels.forEach(c=>{
+          if(c.id==='geral')c.desc='Conversa geral da '+BRAND+'.';
+          if(c.id==='carregadoria')c.name='Carregadoria da CDL';
+          if(c.id==='judiciario')c.name='Poder Judiciário CDL';
+          c.name=brandText(c.name);c.desc=brandText(c.desc);
+        });
+      }
+    }catch{}
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    const nodes=[];let n;
+    while(n=walker.nextNode())nodes.push(n);
+    nodes.forEach(t=>{const p=t.parentElement;if(!p||['SCRIPT','STYLE','NOSCRIPT'].includes(p.tagName))return;const v=brandText(t.nodeValue);if(v!==t.nodeValue)t.nodeValue=v;});
+    root.querySelectorAll?.('[alt]').forEach(el=>{el.alt=brandText(el.alt)});
+  }
+
+  applyBranding();
+  new MutationObserver(m=>{m.forEach(x=>x.addedNodes.forEach(n=>{if(n.nodeType===1)applyBranding(n);else if(n.nodeType===3){const v=brandText(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v;}}))}).observe(document.documentElement,{childList:true,subtree:true});
+
+  try{
+    const oldEnsureProfile=ensureProfile;
+    ensureProfile=async function(){
+      await oldEnsureProfile();
+      if(profile?.bio&&profile.bio.includes('Creative Squad')){
+        const bio=brandText(profile.bio);
+        const {data}=await sb.from('profiles').update({bio}).eq('id',user.id).select().single();
+        if(data)profile=data;
+      }
+      applyBranding();
+    };
+  }catch{}
 
   function setActiveTab(name){
     document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
@@ -19,19 +66,22 @@
       loadNotifications(true);
       if(admin()){q('adminNotifPanel')?.classList.remove('hidden');loadTargets();loadPending();}
       else q('adminNotifPanel')?.classList.add('hidden');
+      applyBranding();
       return;
     }
-    return oldTab(name);
+    const out=oldTab(name);applyBranding();return out;
   };
 
   window.enter=function(){
     oldEnter();
+    applyBranding();
     setTimeout(initNotifUi,0);
   };
 
   async function initNotifUi(){
     if(started||!user)return;
     started=true;
+    applyBranding();
     q('adminNotifPanel')?.classList.toggle('hidden',!admin());
     await refreshBadge();
     await subscribe();
@@ -58,13 +108,14 @@
     box.innerHTML=notifs.length?notifs.map(n=>{
       const unread=!reads.has(n.id);
       const time=new Date(n.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-      return `<article class="csNotice ${unread?'unread':''}"><div class="row between"><b>${esc(n.title||'Notificação')}</b><span class="small">${esc(time)}</span></div><p>${esc(n.body||'')}</p>${n.related_ticket?`<div class="small">Ticket: <b>${esc(n.related_ticket)}</b></div>`:''}</article>`;
+      return `<article class="csNotice ${unread?'unread':''}"><div class="row between"><b>${esc(brandText(n.title||'Notificação'))}</b><span class="small">${esc(time)}</span></div><p>${esc(brandText(n.body||''))}</p>${n.related_ticket?`<div class="small">Ticket: <b>${esc(n.related_ticket)}</b></div>`:''}</article>`;
     }).join(''):'<p class="small">Nenhuma notificação ainda.</p>';
     if(mark){
       const missing=notifs.filter(n=>!reads.has(n.id)).map(n=>({notification_id:n.id,user_id:user.id}));
       if(missing.length)await sb.from('notification_reads').insert(missing);
     }
     await refreshBadge();
+    applyBranding(box);
   }
 
   async function refreshBadge(){
@@ -89,7 +140,7 @@
     const title=q('notificationTitle').value.trim();
     const body=q('notificationBody').value.trim();
     if(!title||!body)return alert('Digite o título e a mensagem.');
-    const {error}=await sb.from('notifications').insert({recipient_email:target,title,body,type:'admin_message',created_by:user.id});
+    const {error}=await sb.from('notifications').insert({recipient_email:target,title:brandText(title),body:brandText(body),type:'admin_message',created_by:user.id});
     if(error)return alert('Não foi possível enviar: '+error.message);
     q('notificationTitle').value='';q('notificationBody').value='';
     alert(target?'Notificação enviada para a pessoa escolhida.':'Notificação enviada para todos.');
@@ -110,7 +161,7 @@
     if(!rows.length){box.innerHTML='<p class="small">Nenhuma solicitação pendente.</p>';return;}
     box.innerHTML=rows.map(r=>r.kind==='guest'
       ? `<div class="csRequest"><div><b>🔔 Alguém está tentando entrar</b></div><div class="csTicket">Seu ticket é ${esc(r.ticket)}</div><div class="small">Entrada solicitada sem e-mail.</div><div class="row" style="margin-top:8px"><button class="btn green" onclick="resolveCsGuestAccess(${Number(r.ticket)},'approved')">Sim, autorizar</button><button class="btn danger" onclick="resolveCsGuestAccess(${Number(r.ticket)},'denied')">Não</button></div></div>`
-      : `<div class="csRequest"><div><b>${esc(r.email)}</b></div><div class="csTicket">Ticket ${esc(r.ticket)}</div><div class="small">Está tentando entrar na Creative Squad.</div><div class="row" style="margin-top:8px"><button class="btn green" onclick="resolveCsAccess(${Number(r.ticket)},'approved')">Sim, autorizar</button><button class="btn danger" onclick="resolveCsAccess(${Number(r.ticket)},'denied')">Não</button></div></div>`
+      : `<div class="csRequest"><div><b>${esc(r.email)}</b></div><div class="csTicket">Ticket ${esc(r.ticket)}</div><div class="small">Está tentando entrar na ${BRAND}.</div><div class="row" style="margin-top:8px"><button class="btn green" onclick="resolveCsAccess(${Number(r.ticket)},'approved')">Sim, autorizar</button><button class="btn danger" onclick="resolveCsAccess(${Number(r.ticket)},'denied')">Não</button></div></div>`
     ).join('');
   }
 
@@ -155,6 +206,6 @@
     }
   }
 
-  setTimeout(initNotifUi,500);
-  setTimeout(initNotifUi,1500);
+  setTimeout(()=>{applyBranding();initNotifUi()},500);
+  setTimeout(()=>{applyBranding();initNotifUi()},1500);
 })();
