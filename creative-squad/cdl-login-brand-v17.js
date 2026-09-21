@@ -8,6 +8,7 @@
     .replace(/\bCS\b/g,'CDL');
   function apply(root=document){
     document.title=BRAND;
+    const icon=document.querySelector('link[rel~="icon"]');if(icon)icon.href=LOGO;
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
     const nodes=[];let n;
     while(n=walker.nextNode())nodes.push(n);
