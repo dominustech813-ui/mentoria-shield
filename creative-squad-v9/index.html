@@ -1,17 +1,18 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07120a">
-<title>Creative Squad</title>
-<link rel="icon" href="logo.jpg"><link rel="stylesheet" href="../creative-squad/styles.css?v=10">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>.status-ok{color:#7cff35!important}.status-err{color:#ffe42f!important}.login .brand.big img{object-fit:cover}</style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07120a"><title>Creative Squad</title>
+<link rel="icon" href="logo.jpg"><link rel="stylesheet" href="../creative-squad/styles.css?v=12"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.login .brand.big img{object-fit:cover}.accessBox{margin-top:12px;padding:12px;border:1px solid #675d17;background:#211d08;border-radius:10px}.ticketBox{margin-top:10px;padding:13px;border:1px solid #31583d;background:#07140b;border-radius:10px;text-align:center}.ticketNumber{font-size:30px;font-weight:1000;letter-spacing:.08em;color:#ffe42f}.statusOk{color:#7cff35!important}.statusErr{color:#ffe42f!important}
+</style>
 </head>
 <body>
 <section id="login" class="login card">
   <div class="brand big"><img src="logo.jpg" alt="Creative Squad"><div><span class="tag">MINECRAFT</span><h1>Creative Squad</h1></div></div>
-  <div id="emailStep"><p>Digite seu e-mail para receber o código de acesso enviado pelo <b>Bot CS</b>.</p><input id="email" type="email" placeholder="voce@email.com" autocomplete="email"><button id="sendBtn" class="btn green" onclick="sendCode()">Enviar código</button></div>
-  <div id="codeStep" class="hidden"><p>Código enviado para <b id="codeEmail"></b></p><input id="code" class="otp" inputmode="numeric" maxlength="8" placeholder="00000000"><div class="row"><button class="btn green" onclick="verifyCode()">Verificar</button><button class="btn dark" onclick="sendCode(true)">Reenviar</button><button class="btn dark" onclick="changeEmail()">Trocar e-mail</button></div></div>
+  <div id="emailStep"><p>Digite seu e-mail para receber o código de acesso enviado pelo <b>Bot CS</b>.</p><input id="email" type="email" placeholder="voce@email.com" autocomplete="email"><button id="sendBtn" class="btn green" onclick="sendCode()">Enviar código</button><div id="unauthorizedBox" class="accessBox hidden"><b>🔒 Você não tem autorização do site.</b><p>Peça para um ADM autorizar sua entrada.</p><button class="btn yellow" onclick="requestAccess()">Entrar de outro jeito</button></div></div>
+  <div id="waitingStep" class="hidden"><p>Solicitação enviada para o administrador.</p><div class="ticketBox"><div class="small">SEU TICKET É</div><div id="waitingTicket" class="ticketNumber">0000000</div><div id="waitingStatus" class="small">Notificação enviada. Esperando o ADM...</div></div><div class="row" style="margin-top:10px"><button class="btn dark" onclick="checkStatus(true)">Atualizar</button><button class="btn dark" onclick="cancelWait()">Trocar e-mail</button></div></div>
+  <div id="codeStep" class="hidden"><p>Código enviado para <b id="codeEmail"></b></p><input id="code" class="otp" inputmode="numeric" maxlength="8" placeholder="00000000"><div class="row"><button id="verifyBtn" class="btn green" onclick="verifyCode()">Verificar</button><button class="btn dark" onclick="sendCode(true)">Reenviar</button><button class="btn dark" onclick="changeEmail()">Trocar e-mail</button></div></div>
   <div id="loginMsg" class="msg"></div>
 </section>
 <section id="verify" class="verify hidden"><div id="verifyContent"></div></section>
@@ -20,34 +21,26 @@ const SUPABASE_URL='https://yivgtvgyaalhlcxatbfc.supabase.co';
 const SUPABASE_KEY='sb_publishable_JSNYdrq-FFHQtZ0DO3sfVw_v93KOBjs';
 const ADMIN='theoccosta2020@gmail.com';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-let pendingEmail='';
-const $=id=>document.getElementById(id);
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function msg(t,ok=false){$('loginMsg').textContent=t||'';$('loginMsg').className='msg '+(ok?'status-ok':'status-err')}
+let pendingEmail='',ticket=null,poll=null;
+const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function msg(t,ok=false){$('loginMsg').textContent=t||'';$('loginMsg').className='msg '+(ok?'statusOk':'statusErr')}
+async function api(payload,auth=false){const headers={'Content-Type':'application/json','apikey':SUPABASE_KEY};if(auth){const {data}=await sb.auth.getSession();if(data.session?.access_token)headers.Authorization='Bearer '+data.session.access_token;}const r=await fetch(SUPABASE_URL+'/functions/v1/send-cs-otp',{method:'POST',headers,body:JSON.stringify(payload)});const j=await r.json().catch(()=>({}));return {ok:r.ok,data:j};}
 async function sendCode(resend=false){
-  const email=(resend?pendingEmail:$('email').value.trim()).toLowerCase();
-  if(!email||!email.includes('@'))return msg('Digite um e-mail válido.');
-  pendingEmail=email;$('sendBtn').disabled=true;msg('Bot CS está enviando o código...');
-  try{
-    const r=await fetch(SUPABASE_URL+'/functions/v1/send-cs-otp',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email})});
-    const j=await r.json().catch(()=>({}));
-    if(!r.ok||!j.ok){msg(j.error||'Não foi possível enviar o código agora.');return}
-    $('emailStep').classList.add('hidden');$('codeStep').classList.remove('hidden');$('codeEmail').textContent=email;$('code').value='';msg('✅ Código enviado pelo Bot CS. Confira seu e-mail.',true);
-  }catch(e){msg('Não foi possível conectar ao Bot CS. Tente novamente.')}finally{$('sendBtn').disabled=false}
+  const email=(resend?pendingEmail:$('email').value.trim()).toLowerCase();if(!email||!email.includes('@'))return msg('Digite um e-mail válido.');pendingEmail=email;$('unauthorizedBox').classList.add('hidden');$('sendBtn').disabled=true;msg('Bot CS está verificando sua autorização...');
+  try{const r=await api({action:'send_code',email});$('sendBtn').disabled=false;if(!r.ok){if(r.data?.code==='not_authorized'){$('unauthorizedBox').classList.remove('hidden');return msg('Você não tem autorização do site. Peça para um ADM autorizar sua entrada.');}return msg(r.data?.error||'Não foi possível enviar o código agora.');}$('emailStep').classList.add('hidden');$('waitingStep').classList.add('hidden');$('codeStep').classList.remove('hidden');$('codeEmail').textContent=email;$('code').value='';msg('✅ Código enviado pelo Bot CS. Confira seu e-mail.',true);}catch(e){$('sendBtn').disabled=false;msg('Não foi possível conectar ao Bot CS. Tente novamente.');}
 }
-function changeEmail(){$('codeStep').classList.add('hidden');$('emailStep').classList.remove('hidden');msg('')}
+async function requestAccess(){
+  const email=(pendingEmail||$('email').value.trim()).toLowerCase();if(!email||!email.includes('@'))return msg('Digite um e-mail válido.');if(!confirm('Deseja enviar uma solicitação para o ADM para sua entrada?'))return;pendingEmail=email;msg('Enviando solicitação para o ADM...');
+  try{const r=await api({action:'request_access',email});if(!r.ok)return msg(r.data?.error||'Não foi possível enviar a solicitação.');if(r.data?.authorized){msg('Seu e-mail já está autorizado. Enviando código...');return sendCode(true);}ticket=Number(r.data.ticket);$('emailStep').classList.add('hidden');$('codeStep').classList.add('hidden');$('waitingStep').classList.remove('hidden');$('waitingTicket').textContent=String(ticket);$('waitingStatus').textContent='Notificação enviada. Esperando o ADM...';msg('');startPoll();}catch(e){msg('Não foi possível enviar a solicitação agora.');}
+}
+function startPoll(){if(poll)clearInterval(poll);poll=setInterval(()=>checkStatus(false),5000)}
+async function checkStatus(manual=false){if(!ticket||!pendingEmail)return;if(manual)$('waitingStatus').textContent='Atualizando status...';try{const r=await api({action:'request_status',email:pendingEmail,ticket});if(!r.ok){if(manual)$('waitingStatus').textContent=r.data?.error||'Não foi possível atualizar.';return;}if(r.data.status==='approved'){if(poll){clearInterval(poll);poll=null}$('waitingStatus').innerHTML='✅ <b>Seu acesso foi autorizado!</b> Enviando seu código...';await sleep(700);sendCode(true);}else if(r.data.status==='denied'){if(poll){clearInterval(poll);poll=null}$('waitingStatus').innerHTML='❌ <b>Sua solicitação não foi autorizada.</b>';}else $('waitingStatus').textContent='⏳ Aguardando o ADM autorizar...';}catch(e){if(manual)$('waitingStatus').textContent='Falha ao atualizar status.';}}
+function cancelWait(){if(poll){clearInterval(poll);poll=null}ticket=null;$('waitingStep').classList.add('hidden');$('emailStep').classList.remove('hidden');msg('')}
+function changeEmail(){$('codeStep').classList.add('hidden');$('waitingStep').classList.add('hidden');$('emailStep').classList.remove('hidden');$('unauthorizedBox').classList.add('hidden');if(poll){clearInterval(poll);poll=null}msg('')}
 async function verifyCode(){
-  const token=$('code').value.trim();if(token.length<6||token.length>8)return msg('Digite o código recebido no e-mail.');msg('Verificando código...');
-  const {data,error}=await sb.auth.verifyOtp({email:pendingEmail,token,type:'email'});
-  if(error||!data.user)return msg('Código inválido ou expirado.');
-  let name=pendingEmail===ADMIN?'Theo':pendingEmail.split('@')[0];
-  const {data:p}=await sb.from('profiles').select('display_name').eq('id',data.user.id).maybeSingle();if(p?.display_name)name=p.display_name;
-  $('login').classList.add('hidden');$('verify').classList.remove('hidden');
-  $('verifyContent').innerHTML='<div class="icon">✅</div><h2>VERIFICADO</h2><p>E-mail confirmado.</p>';await sleep(850);
-  $('verifyContent').innerHTML='<div class="icon">⏳</div><h2>Entrando...</h2>';await sleep(800);
-  $('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo de volta,<br>'+name.toUpperCase()+'!!</h2>';await sleep(1300);
-  location.replace('../creative-squad-v8/?login='+Date.now());
+  const token=$('code').value.trim();if(token.length<6)return msg('Digite o código recebido no e-mail.');$('verifyBtn').disabled=true;msg('Verificando código...');const {data,error}=await sb.auth.verifyOtp({email:pendingEmail,token,type:'email'});$('verifyBtn').disabled=false;if(error||!data.user)return msg('Código inválido ou expirado.');const {data:allowed}=await sb.rpc('is_cs_authorized');if(!allowed){await sb.auth.signOut();$('codeStep').classList.add('hidden');$('emailStep').classList.remove('hidden');$('unauthorizedBox').classList.remove('hidden');return msg('Você ainda não está autorizado pelo ADM.');}
+  let name=pendingEmail===ADMIN?'Theo':pendingEmail.split('@')[0];const {data:p}=await sb.from('profiles').select('display_name').eq('id',data.user.id).maybeSingle();if(p?.display_name)name=p.display_name;$('login').classList.add('hidden');$('verify').classList.remove('hidden');$('verifyContent').innerHTML='<div class="icon">✅</div><h2>VERIFICADO</h2><p>E-mail confirmado.</p>';await sleep(850);$('verifyContent').innerHTML='<div class="icon">⏳</div><h2>Entrando...</h2>';await sleep(800);$('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo de volta,<br>'+name.toUpperCase()+'!!</h2>';await sleep(1200);location.replace('../creative-squad-v8/?login='+Date.now());
 }
-(async()=>{const {data}=await sb.auth.getSession();if(data.session?.user)location.replace('../creative-squad-v8/?session='+Date.now())})();
+(async()=>{const {data}=await sb.auth.getSession();if(data.session?.user){const {data:allowed}=await sb.rpc('is_cs_authorized');if(allowed)location.replace('../creative-squad-v8/?session='+Date.now());else await sb.auth.signOut();}})();
 </script>
 </body></html>
