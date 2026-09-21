@@ -6,10 +6,10 @@
 <meta name="theme-color" content="#07120a">
 <title>Creative Dark Legends 2 COPA CDL</title>
 <link rel="icon" href="../creative-squad-v9/logo.jpg">
-<link rel="stylesheet" href="../creative-squad/styles.css?v=22">
-<link rel="stylesheet" href="discord.css?v=22">
-<link rel="stylesheet" href="../creative-squad/voice-discord-v19.css?v=22">
-<link rel="stylesheet" href="../creative-squad/presence-status-v20.css?v=22">
+<link rel="stylesheet" href="../creative-squad/styles.css?v=23">
+<link rel="stylesheet" href="discord.css?v=23">
+<link rel="stylesheet" href="../creative-squad/voice-discord-v19.css?v=23">
+<link rel="stylesheet" href="../creative-squad/presence-status-v20.css?v=23">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 .notif-badge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:4px;border-radius:999px;background:#ff5d65;color:#fff;font-size:9px;font-weight:1000}.csNotice{background:#07140b;border:1px solid #2a4935;border-radius:10px;padding:12px;margin:9px 0}.csNotice.unread{border-color:#7cff35;box-shadow:0 0 0 1px #7cff3530}.csNotice p{margin:7px 0;white-space:pre-wrap}.csRequest{background:#171d09;border:1px solid #675d17;border-radius:10px;padding:11px;margin-top:9px}.csTicket{font-size:13px;color:#ffe42f;font-weight:1000;margin:5px 0}#adminNotifPanel hr{border:0;border-top:1px solid #31523b;margin:18px 0}
@@ -43,11 +43,12 @@
 function toggleChannelSidebar(force){const side=document.querySelector('#chat .chat aside'),overlay=document.getElementById('channelOverlay');if(!side||!overlay)return;const open=typeof force==='boolean'?force:!side.classList.contains('open');side.classList.toggle('open',open);overlay.classList.toggle('show',open)}
 document.addEventListener('click',e=>{if(window.innerWidth<=700&&e.target.closest('#channels .channel,#voices .voice'))setTimeout(()=>toggleChannelSidebar(false),60)});window.addEventListener('resize',()=>{if(window.innerWidth>700)toggleChannelSidebar(false)});
 </script>
-<script src="../creative-squad/app.js?v=22"></script>
-<script src="../creative-squad-v9/auth-v9.js?v=22"></script>
-<script src="../creative-squad/access-notifications-v12.js?v=22"></script>
-<script src="../creative-squad/voice-discord-v19.js?v=22"></script>
-<script src="../creative-squad/presence-status-v20.js?v=22"></script>
-<script src="../creative-squad/dm-discord-v22.js?v=22"></script>
+<script src="../creative-squad/app.js?v=23"></script>
+<script src="../creative-squad-v9/auth-v9.js?v=23"></script>
+<script src="../creative-squad/access-notifications-v12.js?v=23"></script>
+<script src="../creative-squad/voice-discord-v19.js?v=23"></script>
+<script src="../creative-squad/presence-status-v20.js?v=23"></script>
+<script src="../creative-squad/dm-discord-v22.js?v=23"></script>
+<script src="../creative-squad/role-editor-v23.js?v=23"></script>
 </body>
 </html>
