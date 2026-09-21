@@ -1,6 +1,6 @@
 (()=>{
   const q=id=>document.getElementById(id);
-  let notifSub=null,accessSub=null,started=false;
+  let notifSub=null,accessSub=null,guestSub=null,started=false,pendingTimer=null;
   const oldTab=window.tab;
   const oldEnter=window.enter;
 
@@ -35,7 +35,10 @@
     q('adminNotifPanel')?.classList.toggle('hidden',!admin());
     await refreshBadge();
     await subscribe();
-    if(admin())await loadPending();
+    if(admin()){
+      await loadPending();
+      pendingTimer=setInterval(loadPending,5000);
+    }
   }
 
   async function rows(){
@@ -96,10 +99,19 @@
   async function loadPending(){
     if(!admin())return;
     const box=q('pendingAccessRequests');if(!box)return;
-    const {data,error}=await sb.from('access_requests').select('*').eq('status','pending').order('created_at',{ascending:true});
-    if(error){box.innerHTML='<p class="small">Não foi possível carregar as solicitações.</p>';return;}
-    if(!data?.length){box.innerHTML='<p class="small">Nenhuma solicitação pendente.</p>';return;}
-    box.innerHTML=data.map(r=>`<div class="csRequest"><div><b>${esc(r.email)}</b></div><div class="csTicket">Ticket ${esc(r.ticket)}</div><div class="small">Está tentando entrar na Creative Squad.</div><div class="row" style="margin-top:8px"><button class="btn green" onclick="resolveCsAccess(${Number(r.ticket)},'approved')">Sim, autorizar</button><button class="btn danger" onclick="resolveCsAccess(${Number(r.ticket)},'denied')">Não</button></div></div>`).join('');
+    const [emailReq,guestReq]=await Promise.all([
+      sb.from('access_requests').select('ticket,email,created_at').eq('status','pending').order('created_at',{ascending:true}),
+      sb.from('guest_access_requests').select('ticket,created_at').eq('status','pending').order('created_at',{ascending:true})
+    ]);
+    if(emailReq.error||guestReq.error){box.innerHTML='<p class="small">Não foi possível carregar as solicitações.</p>';return;}
+    const emailRows=(emailReq.data||[]).map(r=>({kind:'email',...r}));
+    const guestRows=(guestReq.data||[]).map(r=>({kind:'guest',...r}));
+    const rows=[...emailRows,...guestRows].sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+    if(!rows.length){box.innerHTML='<p class="small">Nenhuma solicitação pendente.</p>';return;}
+    box.innerHTML=rows.map(r=>r.kind==='guest'
+      ? `<div class="csRequest"><div><b>🔔 Alguém está tentando entrar</b></div><div class="csTicket">Seu ticket é ${esc(r.ticket)}</div><div class="small">Entrada solicitada sem e-mail.</div><div class="row" style="margin-top:8px"><button class="btn green" onclick="resolveCsGuestAccess(${Number(r.ticket)},'approved')">Sim, autorizar</button><button class="btn danger" onclick="resolveCsGuestAccess(${Number(r.ticket)},'denied')">Não</button></div></div>`
+      : `<div class="csRequest"><div><b>${esc(r.email)}</b></div><div class="csTicket">Ticket ${esc(r.ticket)}</div><div class="small">Está tentando entrar na Creative Squad.</div><div class="row" style="margin-top:8px"><button class="btn green" onclick="resolveCsAccess(${Number(r.ticket)},'approved')">Sim, autorizar</button><button class="btn danger" onclick="resolveCsAccess(${Number(r.ticket)},'denied')">Não</button></div></div>`
+    ).join('');
   }
 
   async function api(payload){
@@ -120,13 +132,25 @@
     await loadPending();await loadNotifications(false);await refreshBadge();
   };
 
+  window.resolveCsGuestAccess=async function(ticket,decision){
+    if(!admin())return;
+    if(!confirm(decision==='approved'?`Autorizar o ticket ${ticket} a entrar?`:`Recusar o ticket ${ticket}?`))return;
+    const r=await api({action:'resolve_guest_access',ticket,decision});
+    if(!r.ok)return alert(r.data?.error||'Não foi possível concluir.');
+    alert(decision==='approved'?`✅ Ticket ${ticket} autorizado.`:`❌ Ticket ${ticket} recusado.`);
+    await loadPending();await loadNotifications(false);await refreshBadge();
+  };
+
   async function subscribe(){
     notifSub=sb.channel('cs-notifications-ui-'+Date.now())
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},async()=>{await refreshBadge();if(!q('notifications')?.classList.contains('hidden'))await loadNotifications(false);})
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},async()=>{await refreshBadge();if(admin())await loadPending();if(!q('notifications')?.classList.contains('hidden'))await loadNotifications(false);})
       .subscribe();
     if(admin()){
       accessSub=sb.channel('cs-access-ui-'+Date.now())
         .on('postgres_changes',{event:'*',schema:'public',table:'access_requests'},async()=>{await loadPending();await refreshBadge();})
+        .subscribe();
+      guestSub=sb.channel('cs-guest-access-ui-'+Date.now())
+        .on('postgres_changes',{event:'*',schema:'public',table:'guest_access_requests'},async()=>{await loadPending();await refreshBadge();})
         .subscribe();
     }
   }
