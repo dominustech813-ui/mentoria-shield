@@ -9,10 +9,10 @@
 <meta name="theme-color" content="#07120a">
 <title>Creative Squad</title>
 <link rel="icon" href="../creative-squad-v9/logo.jpg">
-<link rel="stylesheet" href="../creative-squad/styles.css?v=15">
+<link rel="stylesheet" href="../creative-squad/styles.css?v=16">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-.login .brand.big img{object-fit:cover}.loginMethods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 14px}.methodTab{border:1px solid #31523b;background:#09160e;color:#c7d5ca;border-radius:10px;padding:12px 10px;font-weight:900}.methodTab.active{background:#7cff35;color:#062000;border-color:#7cff35}.accessBox{margin-top:12px;padding:14px;border:1px solid #675d17;background:#211d08;border-radius:10px}.ticketBox{margin-top:10px;padding:14px;border:1px solid #31583d;background:#07140b;border-radius:10px;text-align:center}.ticketNumber{font-size:30px;font-weight:1000;letter-spacing:.08em;color:#ffe42f}.statusOk{color:#7cff35!important}.statusErr{color:#ffe42f!important}.full{width:100%}.altHelp{color:#a9b6ac;line-height:1.45}.guestButton{font-size:15px;padding:14px}@media(max-width:520px){.loginMethods{grid-template-columns:1fr}}
+.login .brand.big img{object-fit:cover}.loginMethods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 14px}.methodTab{border:1px solid #31523b;background:#09160e;color:#c7d5ca;border-radius:10px;padding:12px 10px;font-weight:900}.methodTab.active{background:#7cff35;color:#062000;border-color:#7cff35}.accessBox{margin-top:12px;padding:14px;border:1px solid #675d17;background:#211d08;border-radius:10px}.ticketBox{margin-top:10px;padding:14px;border:1px solid #31583d;background:#07140b;border-radius:10px;text-align:center}.ticketNumber{font-size:30px;font-weight:1000;letter-spacing:.08em;color:#ffe42f}.statusOk{color:#7cff35!important}.statusErr{color:#ffe42f!important}.full{width:100%}.altHelp{color:#a9b6ac;line-height:1.45}.guestButton{font-size:15px;padding:14px}.waitingActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}@media(max-width:520px){.loginMethods,.waitingActions{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -50,7 +50,10 @@
       <div id="waitingTicket" class="ticketNumber">0000000</div>
       <div id="waitingStatus" class="small">⏳ Aguardando ADM. Isso pode demorar alguns instantes.</div>
     </div>
-    <div class="row" style="margin-top:10px"><button class="btn dark" onclick="checkGuestStatus(true)">Atualizar</button></div>
+    <div class="waitingActions">
+      <button class="btn dark" onclick="checkGuestStatus(true)">Atualizar</button>
+      <button id="notifyAgainBtn" class="btn yellow" onclick="notifyAdminAgain()">📧 Avisar ADM novamente</button>
+    </div>
   </div>
 
   <div id="codeStep" class="hidden">
@@ -92,6 +95,9 @@ async function requestGuestAccess(){
     guest={ticket:Number(r.data.ticket),request_key:String(r.data.request_key)};
     localStorage.setItem(GUEST_STORE,JSON.stringify(guest));
     showWaiting();
+    $('waitingStatus').textContent=r.data?.email_alert_sent
+      ? '📧 Aviso enviado para a caixa de entrada do ADM. Aguardando autorização...'
+      : '🔔 Aviso criado no site. Aguardando ADM.';
     msg('');
   }catch(e){msg('Não foi possível enviar a solicitação agora.')}finally{$('guestRequestBtn').disabled=false}
 }
@@ -102,6 +108,17 @@ function showWaiting(){
   $('waitingTicket').textContent=String(guest.ticket);
   $('waitingStatus').textContent='⏳ Aguardando ADM. Isso pode demorar alguns instantes.';
   stopPoll();poll=setInterval(()=>checkGuestStatus(false),4000);
+}
+async function notifyAdminAgain(){
+  if(!guest)return;
+  const btn=$('notifyAgainBtn');btn.disabled=true;$('waitingStatus').textContent='📧 Enviando novo aviso para o ADM...';
+  try{
+    const r=await api({action:'guest_notify_admin',ticket:guest.ticket,request_key:guest.request_key});
+    if(!r.ok){$('waitingStatus').textContent=r.data?.error||'Não foi possível avisar o ADM novamente.';return}
+    $('waitingStatus').textContent=r.data?.email_alert_sent
+      ? '✅ Novo aviso enviado para a caixa de entrada do ADM.'
+      : '🔔 Aviso enviado no site, mas o e-mail não pôde ser enviado.';
+  }catch(e){$('waitingStatus').textContent='Não foi possível avisar o ADM agora.'}finally{setTimeout(()=>{btn.disabled=false},3000)}
 }
 async function checkGuestStatus(manual=false){
   if(!guest)return;
@@ -119,22 +136,22 @@ async function checkGuestStatus(manual=false){
       $('login').classList.add('hidden');$('verify').classList.remove('hidden');
       $('verifyContent').innerHTML='<div class="icon">✅</div><h2>AUTORIZADO</h2><p>Entrada liberada pelo ADM.</p>';await sleep(700);
       $('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo à<br>Creative Squad!</h2>';await sleep(900);
-      location.replace('../creative-squad-v8/?guest='+Date.now()+'&v=15');
+      location.replace('../creative-squad-v8/?guest='+Date.now()+'&v=16');
     }else if(r.data.status==='denied'){
       stopPoll();$('waitingStatus').innerHTML='❌ <b>O ADM não autorizou esta entrada.</b>';localStorage.removeItem(GUEST_STORE);guest=null;
-    }else $('waitingStatus').textContent='⏳ Aguardando ADM. Isso pode demorar alguns instantes.';
+    }else if(manual)$('waitingStatus').textContent='⏳ Aguardando ADM. Isso pode demorar alguns instantes.';
   }catch(e){if(manual)$('waitingStatus').textContent='Falha ao atualizar status.'}
 }
 async function verifyCode(){
   const token=$('code').value.trim();if(token.length<6)return msg('Digite o código recebido no e-mail.');$('verifyBtn').disabled=true;msg('Verificando código...');
   const {data,error}=await sb.auth.verifyOtp({email:pendingEmail,token,type:'email'});$('verifyBtn').disabled=false;if(error||!data.user)return msg('Código inválido ou expirado.');
   const {data:allowed}=await sb.rpc('is_cs_authorized');if(!allowed){await sb.auth.signOut();showMethod('alt');return msg('Você ainda não está autorizado pelo ADM.');}
-  let name=pendingEmail===ADMIN?'Theo':pendingEmail.split('@')[0];$('login').classList.add('hidden');$('verify').classList.remove('hidden');$('verifyContent').innerHTML='<div class="icon">✅</div><h2>VERIFICADO</h2>';await sleep(700);$('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo,<br>'+name.toUpperCase()+'!!</h2>';await sleep(900);location.replace('../creative-squad-v8/?login='+Date.now()+'&v=15');
+  let name=pendingEmail===ADMIN?'Theo':pendingEmail.split('@')[0];$('login').classList.add('hidden');$('verify').classList.remove('hidden');$('verifyContent').innerHTML='<div class="icon">✅</div><h2>VERIFICADO</h2>';await sleep(700);$('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo,<br>'+name.toUpperCase()+'!!</h2>';await sleep(900);location.replace('../creative-squad-v8/?login='+Date.now()+'&v=16');
 }
 (async()=>{
   try{guest=JSON.parse(localStorage.getItem(GUEST_STORE)||'null')}catch{guest=null}
   const {data}=await sb.auth.getSession();
-  if(data.session?.user){const {data:allowed}=await sb.rpc('is_cs_authorized');if(allowed)return location.replace('../creative-squad-v8/?session='+Date.now()+'&v=15');await sb.auth.signOut();}
+  if(data.session?.user){const {data:allowed}=await sb.rpc('is_cs_authorized');if(allowed)return location.replace('../creative-squad-v8/?session='+Date.now()+'&v=16');await sb.auth.signOut();}
   if(guest){showWaiting();checkGuestStatus(false)}
 })();
 </script>
