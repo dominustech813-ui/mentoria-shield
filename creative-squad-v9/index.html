@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#07120a">
+<title>Creative Squad</title>
+<link rel="icon" href="logo.jpg"><link rel="stylesheet" href="../creative-squad/styles.css?v=9">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>.status-ok{color:#7cff35!important}.status-err{color:#ffe42f!important}.login .brand.big img{object-fit:cover}</style>
+</head>
+<body>
+<section id="login" class="login card">
+  <div class="brand big"><img src="logo.jpg" alt="Creative Squad"><div><span class="tag">MINECRAFT</span><h1>Creative Squad</h1></div></div>
+  <div id="emailStep"><p>Digite seu e-mail para receber o código de acesso enviado pelo <b>Bot CS</b>.</p><input id="email" type="email" placeholder="voce@email.com" autocomplete="email"><button id="sendBtn" class="btn green" onclick="sendCode()">Enviar código</button></div>
+  <div id="codeStep" class="hidden"><p>Código enviado para <b id="codeEmail"></b></p><input id="code" class="otp" inputmode="numeric" maxlength="6" placeholder="000000"><div class="row"><button class="btn green" onclick="verifyCode()">Verificar</button><button class="btn dark" onclick="sendCode(true)">Reenviar</button><button class="btn dark" onclick="changeEmail()">Trocar e-mail</button></div></div>
+  <div id="loginMsg" class="msg"></div>
+</section>
+<section id="verify" class="verify hidden"><div id="verifyContent"></div></section>
+<script>
+const SUPABASE_URL='https://yivgtvgyaalhlcxatbfc.supabase.co';
+const SUPABASE_KEY='sb_publishable_JSNYdrq-FFHQtZ0DO3sfVw_v93KOBjs';
+const ADMIN='theoccosta2020@gmail.com';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+let pendingEmail='';
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function msg(t,ok=false){$('loginMsg').textContent=t||'';$('loginMsg').className='msg '+(ok?'status-ok':'status-err')}
+async function sendCode(resend=false){
+  const email=(resend?pendingEmail:$('email').value.trim()).toLowerCase();
+  if(!email||!email.includes('@'))return msg('Digite um e-mail válido.');
+  pendingEmail=email;$('sendBtn').disabled=true;msg('Bot CS está enviando o código...');
+  try{
+    const r=await fetch(SUPABASE_URL+'/functions/v1/send-cs-otp',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify({email})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.ok){msg(j.error||'Não foi possível enviar o código agora.');return}
+    $('emailStep').classList.add('hidden');$('codeStep').classList.remove('hidden');$('codeEmail').textContent=email;$('code').value='';msg('✅ Código enviado pelo Bot CS. Confira seu e-mail.',true);
+  }catch(e){msg('Não foi possível conectar ao Bot CS. Tente novamente.')}finally{$('sendBtn').disabled=false}
+}
+function changeEmail(){$('codeStep').classList.add('hidden');$('emailStep').classList.remove('hidden');msg('')}
+async function verifyCode(){
+  const token=$('code').value.trim();if(token.length!==6)return msg('Digite os 6 números recebidos no e-mail.');msg('Verificando código...');
+  const {data,error}=await sb.auth.verifyOtp({email:pendingEmail,token,type:'email'});
+  if(error||!data.user)return msg('Código inválido ou expirado.');
+  let name=pendingEmail===ADMIN?'Theo':pendingEmail.split('@')[0];
+  const {data:p}=await sb.from('profiles').select('display_name').eq('id',data.user.id).maybeSingle();if(p?.display_name)name=p.display_name;
+  $('login').classList.add('hidden');$('verify').classList.remove('hidden');
+  $('verifyContent').innerHTML='<div class="icon">✅</div><h2>VERIFICADO</h2><p>E-mail confirmado.</p>';await sleep(850);
+  $('verifyContent').innerHTML='<div class="icon">⏳</div><h2>Entrando...</h2>';await sleep(800);
+  $('verifyContent').innerHTML='<div class="icon">🎮</div><h2>Bem-vindo de volta,<br>'+name.toUpperCase()+'!!</h2>';await sleep(1300);
+  location.replace('../creative-squad-v8/?login='+Date.now());
+}
+(async()=>{const {data}=await sb.auth.getSession();if(data.session?.user)location.replace('../creative-squad-v8/?session='+Date.now())})();
+</script>
+</body></html>
