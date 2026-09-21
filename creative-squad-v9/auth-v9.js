@@ -2,7 +2,7 @@ window.sendCode = async function(resend=false){
   const email = resend ? pendingEmail : $('email').value.trim();
   if(!email || !email.includes('@')) return loginMsg('Digite um e-mail válido.');
   pendingEmail=email;
-  loginMsg('Bot CS está enviando o código...');
+  loginMsg('Bot CDL está enviando o código...');
   try{
     const r = await fetch('https://yivgtvgyaalhlcxatbfc.supabase.co/functions/v1/send-cs-otp',{
       method:'POST',
@@ -15,8 +15,8 @@ window.sendCode = async function(resend=false){
     $('codeStep').classList.remove('hidden');
     $('codeEmail').textContent=email;
     $('code').value='';
-    loginMsg('Código enviado pelo Bot CS. Confira seu e-mail.');
+    loginMsg('Código enviado pelo Bot CDL. Confira seu e-mail.');
   }catch(e){
-    loginMsg('Não foi possível conectar ao Bot CS. Tente novamente.');
+    loginMsg('Não foi possível conectar ao Bot CDL. Tente novamente.');
   }
 };
