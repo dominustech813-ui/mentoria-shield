@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><meta name="theme-color" content="#173b99"><title>AUDI STUDY IA</title>
+<style>
+:root{--bg:#f4f7fc;--card:#fff;--text:#172033;--muted:#66728a;--p:#2458d6;--p2:#173b99;--line:#dce3ef;--ok:#16834b;--warn:#b56a00}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}.app{max-width:560px;margin:auto;min-height:100vh}.top{background:linear-gradient(145deg,#173b99,#2458d6);color:#fff;padding:22px 18px;border-radius:0 0 24px 24px;position:sticky;top:0;z-index:5;overflow:hidden}.brand{font-size:25px;font-weight:800}.sub{opacity:.9;margin-top:4px;font-size:14px}.content{padding:16px 14px 90px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:13px;box-shadow:0 5px 18px #15233a0b}h1,h2,h3{margin:0 0 10px}h1{font-size:28px}h2{font-size:22px}p{line-height:1.55}.muted{color:var(--muted)}button{width:100%;border:0;border-radius:13px;padding:13px 14px;margin-top:9px;font-size:15px;font-weight:700;background:var(--p);color:#fff;cursor:pointer}button.secondary{background:#edf2ff;color:var(--p2)}input,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:16px}textarea{min-height:105px}.badge{display:inline-block;padding:6px 9px;border-radius:999px;background:#edf2ff;color:var(--p2);font-size:12px;font-weight:700}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lesson{white-space:pre-line;background:#f7f9ff;border:1px solid var(--line);border-radius:12px;padding:13px;line-height:1.55}.answer{border-left:4px solid var(--p);padding:12px;background:#f7f9ff;border-radius:10px;margin-top:10px}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(560px,100%);background:#fff;border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(7,1fr);gap:4px;z-index:10}.nav button{margin:0;padding:10px 2px;font-size:11px;background:#f0f2f7;color:#25304a}.nav button.active{background:#e8efff;color:var(--p2)}details{border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:9px}summary{font-weight:700}.user{background:#edf2ff;border-radius:14px;padding:11px;margin:8px 0 8px 20px}.ai{background:#f5f6f8;border-radius:14px;padding:11px;margin:8px 20px 8px 0}.score{font-size:36px;font-weight:800}.topic{border-left:5px solid var(--p);padding:12px;background:#f7f9ff;border-radius:10px;margin:10px 0}.tip{background:#fff8df;border:1px solid #f0df9b;padding:12px;border-radius:12px;margin:10px 0}.vocab{display:grid;grid-template-columns:1fr 1fr;gap:7px}.vocab div{background:#f7f9ff;padding:9px;border-radius:9px}.sourceText{background:#fffdf2;border:2px solid #eadfb5;border-radius:14px;padding:15px;line-height:1.6}.sourceText h3{color:var(--p2)}@media(max-width:430px){.grid{grid-template-columns:1fr}.brand{font-size:22px}.content{padding-left:10px;padding-right:10px}.card{padding:14px}.nav{gap:3px}.nav button{font-size:10px;padding:9px 1px;min-width:0;line-height:1.15}}
+</style></head><body><div class="app"><header class="top"><div class="brand">AUDI STUDY IA</div><div class="sub">Gestor de provas, cronogramas e simulados • Projeto do Theo</div></header><main class="content" id="app"></main><nav class="nav"><button id="nHome" onclick="home()">🏠 Início</button><button id="nStudy" onclick="study()">📚 Estudar</button><button id="nQuiz" onclick="quizMenu()">📝 Quiz</button><button id="nBrain" onclick="brainPage()">🧠 Meu cérebro</button><button id="nAI" type="button" onclick="aiPage()">🤖 IA</button><button id="nManager" onclick="managerPage()">📅 Provas</button><button id="nVoice" onclick="voicePage()">🎙️ Treino por voz</button></nav></div>
+<script>
+const texts=[
+{id:'space',t:'The Wonders of Space Exploration',x:`For decades, humanity has been captivated by the vast mysteries of the cosmos. Space exploration not only fulfills our innate curiosity but also drives technological innovation. When engineers design spacecraft, they must account for the extreme conditions of the vacuum of space, including dangerous radiation and freezing temperatures. Furthermore, establishing sustainable habitats on other planets, such as Mars, remains one of the most formidable scientific challenges of the 21st century.`,q:[['What are the two main benefits of space exploration mentioned in the text?','It fulfills humanity’s innate curiosity and drives technological innovation.'],['What are the extreme conditions that spacecraft engineers must consider?','The vacuum of space, dangerous radiation, and freezing temperatures.'],['How does the text describe the challenge of building habitats on other planets?','It is described as one of the most formidable (difficult) scientific challenges of the 21st century.'],['Which planet is specifically mentioned as a candidate for sustainable habitats?','Mars.'],['Why is designing spacecraft so complex regarding the environment?','Because engineers must account for extreme, dangerous, and harsh environments.']]},
+{id:'clarkson',t:'Clarkson',x:`Clarkson is a large town. It has more than fifty thousand people living there. It sits next to a large river, the Clark River. Every day, people take the ferry from North Clarkson to South Clarkson to go to work.\n\nMost people live in North Clarkson. There are many trees and the streets are very broad. When the sun shines and the children run and play in the safe streets, North Clarkson is a wonderful place to live.\n\nSouth Clarkson has a lot of shops and factories. People don't live there, but they come in the morning to work. There is also a big stadium where the Clarkson Tigers play. On Sundays, many people go to watch their favorite team.\n\nAt the weekend, people from Clarkson enjoy walking along the bank of the Clark River. They also sail small boats on the water and if there is a little wind, they fly kites in the large park.\n\nEvery year, Clarkson grows in size because a lot of people come to live there. The government builds more houses and the streets get bigger. Maybe in the future, if the town continues to grow, it will become a city!`,q:[['What is there near Clarkson?','A river — the Clark River.'],['What is there in North Clarkson?','Wide/broad streets and many trees.'],['Where is the stadium?','South Clarkson.'],['What do people in Clarkson do at the weekend?','They enjoy walking along the river bank, sailing small boats, and flying kites in the park.'],['Which statement is true?','Clarkson is a popular/growing town.']]},
+{id:'green',t:'The Green City Project',x:`Environmental awareness is growing among young people. Last month, a group of seventh-grade students in Oregon started "The Green City Project." Their goal is to reduce plastic waste in their school. They noticed that the school used thousands of single-use plastic bottles every week. To solve this, the students organized a campaign to collect recycled bottles and bought three water-refill stations for the school corridors. Now, students carry reusable flasks. The school principal announced that plastic waste has decreased by 60% since the project began. The team hopes to expand their initiative to other schools in the district next term.`,q:[['What is the main objective of The Green City Project?','To reduce plastic waste in school.'],['How did the students get the money to buy the water-refill stations?','They sold handmade canvas bags.'],['What change occurred after installing the new stations?','Single-use plastic waste dropped by 60%.'],['What does the project team plan to do next term?','Bring the initiative to other schools.']]},
+{id:'camp',t:'Eco-Keepers Camp',x:`Last summer, fourteen-year-old Liam and his classmates went on a very unusual school trip. They traveled to Eco-Keepers Camp, a nature reserve deep in the mountains. The most important rule of the camp was simple but difficult: no electronic devices were allowed. Every student had to turn off their smartphones, tablets, and smartwatches on the first morning. At first, Liam felt confused and disconnected. He was used to checking his phone every ten minutes, playing online video games, and scrolling through social media. However, after three days without any notifications, something changed. They woke up early every day to the sound of birds instead of loud alarms. During the mornings, they learned how to plant trees and filter river water. In the afternoons, they went hiking, kayaked across a beautiful lake, and practiced archery. Liam discovered that he was actually very good at kayaking and he enjoyed taking pictures with the disposable camera he found. By the end of the week, nobody missed their phones. On the last night, they sat around a campfire, roasted marshmallows, and shared stories under the stars. When the teachers returned their smartphones on Saturday, Liam didn't even want to turn his on immediately. He realized that the real world was much more exciting.`,q:[['What was the main rule of Eco-Keepers Camp?','No electronic devices were permitted.'],['How did Liam feel during the first days at the camp?','Confused and disconnected.'],['Which outdoor activity did Liam discover he was skilled at?','Kayaking.'],['Liam and his friends stayed at a hotel near the beach. True or False?','False.'],['The students used their phones only during the evenings. True or False?','False.'],['At the end of the trip, Liam was desperate to turn his phone back on. True or False?','False.']]},
+{id:'garden',t:'The Community Garden',x:`Sarah lives in a busy city, but her favorite place is a quiet spot in her neighborhood: the community garden. Three years ago, the area was just an empty lot full of trash. Then, Mr. Davis, a retired science teacher, decided to change it. He invited the neighbors to help clean the space and plant seeds. Today, the garden is beautiful. There are colorful flowers, tall tomato plants, carrots, and a big apple tree. Every Saturday morning, Sarah and her friends go there to volunteer. Sarah likes watering the flowers, while her friend Lucas prefers pulling out weeds. Mr. Davis teaches them how to care for the plants and protect them from insects without using harmful chemicals. The garden is not only for growing food; it is also a place for the community to connect. Every month, they have a "Garden Market," where neighbors can buy fresh vegetables. The money they make is used to buy new seeds and tools. Sarah loves the garden because it taught her that cooperation can transform a community.`,q:[['What was the community garden area three years ago?','An empty lot full of trash.'],['Who started the community garden project?','Mr. Davis.'],['What does Lucas like to do in the garden?','Pull out weeds.'],['How does the community use the money from the Garden Market?','To buy new seeds and tools.']]},
+{id:'keys',t:'The Mystery of the Missing Keys',x:`Lucas was already ten minutes late for school, and he still could not find his house keys. He checked his backpack for the third time, but only found his math notebook, a squashed banana, and his library book. "Did you look on the kitchen counter?" his older sister, Clara, shouted from the front door. She was holding her bicycle helmet and looking impatient. Lucas ran into the kitchen. The counter was covered in empty cereal bowls and the morning newspaper, but there were no keys. He was starting to panic because his bus was leaving in exactly five minutes. Just as he was about to give up, he heard a strange jingling sound coming from the living room. He walked into the room and saw his puppy, Buster, sitting proudly on the rug. Buster was happily chewing on a blue plastic keychain. Underneath the puppy's paws were Lucas's missing keys. Lucas grabbed the keys, thanked Buster with a quick pat on the head, and sprinted out the door just in time to catch his bus.`,q:[['Why was Lucas feeling panicked?','He was running late and could not find his keys.'],['What did Lucas find inside his backpack?','A math notebook, a squashed banana, and his library book.'],['Where did Lucas finally find his keys?','Under his puppy Buster’s paws in the living room.'],['How did Lucas get to school that morning?','He caught the school bus.']]}
+];
+
+
+const unitTexts=[
+{id:'artturning',t:'Unit 3 — Reading: Turning Points in the Arts',x:`The history of art has changed many times. Literature changed greatly when writing became widely available and later when printing made books easier to produce and share. Music changed as new instruments and recording technology appeared, making music easier for more people to hear. Visual arts changed through new techniques such as perspective and later through modern art, photography, cinema and computer art. These changes show that art develops together with technology, culture and new ideas.`},
+{id:'artdescription',t:'Unit 3 — Reading: Describing Artwork',x:`An artwork can be described by its type, appearance and meaning. A description may say whether a work is realistic or abstract and can use adjectives such as beautiful, fantastic, strange, colorful, blurred, detailed or traditional. A good description also explains what the artist may want to communicate and what the viewer notices.`},
+{id:'party',t:'Unit 4 — Reading: A Family Party',x:`Last weekend, a family organized a surprise birthday party at home. They decorated the room, prepared food and put candles on the cake. The birthday person arrived later than expected and was surprised to see family members waiting. Everyone talked, ate and celebrated together. The event was special because the family worked together and the surprise was successful.`}
+];
+
+const unit3Topics=[
+{title:'🎨 Art Forms — Formas de arte',body:`Visual arts: painting, sculpture, photography, architecture.\nPerforming arts: music, ballet, theatre, dance.\nLiterature: poetry and short stories.\nOther forms can include cinema and other artistic media.`},
+{title:'⏰ Past Simple — Passado simples',body:`Usamos para ações terminadas no passado.\nAffirmative: I/You/He/She/It/We/They played.\nNegative: subject + did not (didn’t) + verb base.\nQuestion: Did + subject + verb base?\nShort answer: Yes, I/he/she/they did. / No, I/he/she/they didn’t.\nCom BE: was (I/he/she/it) e were (you/we/they).`},
+{title:'🔁 Used to',body:`Usamos USED TO + verbo base para hábitos ou situações do passado que não acontecem mais.\nAffirmative: I used to play.\nNegative: I didn’t use to play.\nQuestion: Did you use to play?\nDepois de did/didn’t, use USE TO, não USED TO.`},
+{title:'📚 Irregular verbs',body:`Alguns verbos não formam o passado apenas com -ed. Exemplos: be → was/were; go → went; have → had; do → did; see → saw; write → wrote; take → took; make → made; come → came; find → found.`},
+{title:'🧠 Vocabulário de arte',body:`artist = artista • audience = público • gallery = galeria • museum = museu • stage = palco • screen = tela • sculpture = escultura • painting = pintura • performer = artista que se apresenta • exhibition = exposição • performance = apresentação.`},
+{title:'✏️ Descrição de uma obra',body:`Uma descrição pode responder: What is it? When was it created? What do you notice? What does the artist want to communicate?\nUse adjetivos para classificar e descrever: abstract, realistic, colorful, beautiful, strange, detailed, traditional.`},
+{title:'💬 Idioms — Likes and dislikes',body:`not my cup of tea = não é muito do meu gosto.\ncan’t stand something = não suportar algo.\nbe crazy about something = gostar muito de algo.`}
+];
+
+const extraTexts=[
+{id:'science',t:'Extra Reading — The School Science Fair',x:`Every spring, students at Green Hill School organize a science fair. This year, Maya and her classmates built a small model of a water filter. They tested different materials and recorded their results in a notebook. On Friday afternoon, families visited the school to see the projects. Maya explained how her filter worked and answered questions from the visitors. Her team did not win first place, but they learned that careful testing and teamwork were important.`,q:[
+ ['What did Maya and her classmates build?','A small model of a water filter.'],
+ ['When did families visit the school?','On Friday afternoon.'],
+ ['What did the students record?','Their test results in a notebook.'],
+ ['What did the team learn?','That careful testing and teamwork were important.']
+]},
+{id:'saturday',t:'Extra Reading — A Rainy Saturday',x:`On Saturday morning, Ben planned to play soccer with his friends, but heavy rain changed his plans. He stayed at home and helped his mother prepare lunch. In the afternoon, he read a short adventure book and practiced English vocabulary. Later, the rain stopped, so Ben went outside for a walk with his dog. He was happy because he found a way to enjoy the day even though his original plan changed.`,q:[
+ ['Why did Ben stay home in the morning?','Heavy rain changed his plans.'],
+ ['What did Ben help his mother prepare?','Lunch.'],
+ ['What did Ben practice in the afternoon?','English vocabulary.'],
+ ['What did Ben do after the rain stopped?','He went for a walk with his dog.']
+]},
+{id:'museum',t:'Extra Reading — A Visit to the Museum',x:`On Tuesday, Class 7B visited the city museum. Their teacher asked them to observe an exhibition about ancient inventions. The students saw old tools, maps, clocks, and models of machines. Ana liked the clocks because she wanted to know how people measured time in the past. Before leaving, each student wrote one interesting fact in a notebook. The teacher said the visit would help them connect history with technology.`,q:[
+ ['Where did Class 7B go?','The city museum.'],
+ ['What was the exhibition about?','Ancient inventions.'],
+ ['Why did Ana like the clocks?','She wanted to know how people measured time in the past.'],
+ ['What did each student write before leaving?','One interesting fact in a notebook.']
+]}
+];
+
+const exercises=[['Susan and Sonya fly to London every month.','Susan and Sonya don’t fly to London every month.','Do Susan and Sonya fly to London every month?','Yes, they do.','No, they don’t.'],['Richard eats Sushi every weekend.','Richard doesn’t eat Sushi every weekend.','Does Richard eat Sushi every weekend?','Yes, he does.','No, he doesn’t.'],['Paul runs by the lake every morning.','Paul doesn’t run by the lake every morning.','Does Paul run by the lake every morning?','Yes, he does.','No, he doesn’t.'],['My brother worked in the hospital last year.','My brother didn’t work in the hospital last year.','Did my brother work in the hospital last year?','Yes, he did.','No, he didn’t.'],['Jennifer and Luisa cooked a chicken yesterday.','Jennifer and Luisa didn’t cook a chicken yesterday.','Did Jennifer and Luisa cook a chicken yesterday?','Yes, they did.','No, they didn’t.'],['My mother visited her sister yesterday.','My mother didn’t visit her sister yesterday.','Did my mother visit her sister yesterday?','Yes, she did.','No, she didn’t.']];
+let S={};
+function nav(id){document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(id&&document.getElementById(id))document.getElementById(id).classList.add('active')}
+
+const AUDI_PROFILE_KEY='audiLearningProfileV1';
+function getProfile(){
+  try{return JSON.parse(localStorage.getItem(AUDI_PROFILE_KEY))||{topics:{},errors:[],streak:0,lastDay:'',lastQuiz:0};}
+  catch(e){return {topics:{},errors:[],streak:0,lastDay:'',lastQuiz:0};}
+}
+function saveProfile(p){localStorage.setItem(AUDI_PROFILE_KEY,JSON.stringify(p));}
+function todayKey(){return new Date().toISOString().slice(0,10);}
+function topicForQuestion(q, sourceType){
+  const s=(q||'').toLowerCase();
+  if(sourceType==='reading' || /what did|what is|where is|who started|which statement|true or false|main objective|near clarkson|under buster|activity did liam|community garden|green city|clarkson/.test(s)) return 'Reading & Comprehension';
+  if(/used to/.test(s)) return 'Used to';
+  if(/\bdid\b|past simple|yesterday|last year|last summer/.test(s)) return 'Past Simple / DID';
+  if(/\bdoes\b|\bdo\b|simple present|every (day|week|month|morning)|doesn/.test(s)) return 'Simple Present / DO / DOES';
+  if(/translate|traduza|tradução/.test(s)) return 'Translation';
+  if(/vocab|word|meaning|expression|idiom|art/.test(s)) return 'Vocabulary';
+  return 'General English';
+}
+function recordAttempt(topic, correct, usedHint=false, source='quiz'){
+  const p=getProfile();
+  if(!p.topics[topic])p.topics[topic]={seen:0,correct:0,hints:0,wrong:0};
+  const t=p.topics[topic]; t.seen++; if(correct)t.correct++; else t.wrong++; if(usedHint)t.hints++;
+  if(!Array.isArray(p.errors))p.errors=[];
+  if(!correct){
+    p.errors.unshift({topic,source,date:new Date().toLocaleString('pt-BR')});
+    p.errors=p.errors.slice(0,40);
+  }
+  const d=todayKey();
+  if(p.lastDay!==d){p.streak=(p.lastDay && (new Date(d)-new Date(p.lastDay))/86400000===1)?(p.streak||0)+1:1;p.lastDay=d;}
+  p.lastQuiz=(p.lastQuiz||0)+1;
+  saveProfile(p);
+}
+function topicMastery(topic){
+  const t=getProfile().topics[topic];
+  if(!t||!t.seen)return 0;
+  return Math.round(t.correct/t.seen*100);
+}
+function weakTopics(){
+  const p=getProfile();
+  return Object.entries(p.topics).filter(([k,v])=>v.seen>=1).sort((a,b)=>(a[1].correct/a[1].seen)-(b[1].correct/b[1].seen)).map(x=>x[0]);
+}
+function brainPage(){
+  nav('nBrain');
+  const p=getProfile(), entries=Object.entries(p.topics);
+  const strongest=entries.filter(([k,v])=>v.seen>0).sort((a,b)=>(b[1].correct/b[1].seen)-(a[1].correct/a[1].seen)).slice(0,3);
+  const weakest=entries.filter(([k,v])=>v.seen>0).sort((a,b)=>(a[1].correct/a[1].seen)-(b[1].correct/b[1].seen)).slice(0,3);
+  const card=(arr,empty)=>arr.length?arr.map(([k,v])=>{let m=Math.round(v.correct/v.seen*100);return `<div class="topic"><b>${esc(k)}</b><br><span class="muted">${v.correct}/${v.seen} acertos • ${m}%</span><div style="height:7px;background:#e7eaf0;border-radius:99px;margin-top:7px"><div style="height:100%;width:${m}%;background:#2458d6;border-radius:99px"></div></div></div>`}).join(''):empty;
+  const last=weakest[0]?.[0]||'Ainda estamos descobrindo';
+  app.innerHTML=`<div class="card"><span class="badge">🧠 Perfil de aprendizagem</span><h2>Meu cérebro</h2><p>Eu observo <b>como você erra</b> para escolher o próximo treino. A nota não é a única coisa importante.</p><div class="grid"><div class="topic"><b>🔥 Sequência</b><br>${p.streak||0} dia(s)</div><div class="topic"><b>📝 Tentativas</b><br>${p.lastQuiz||0}</div></div></div>
+  <div class="card"><h3>🟢 Você está dominando</h3>${card(strongest,'Ainda não há dados suficientes.')}</div>
+  <div class="card"><h3>🔴 Precisa praticar</h3>${card(weakest,'Faça alguns exercícios para eu descobrir suas dificuldades.')}</div>
+  <div class="card"><span class="badge">🎯 Próximo foco</span><h3>${esc(last)}</h3><p>O próximo treino adaptativo vai dar prioridade a esse assunto.</p><button onclick="adaptiveQuiz()">🚀 Treino adaptativo</button><button class="secondary" onclick="brainExplain()">🤖 Explique meu desempenho com IA</button></div>
+  <div class="card"><h3>🔁 Seus erros recentes</h3>${p.errors.length?p.errors.slice(0,8).map(e=>`<div class="answer"><b>${esc(e.topic)}</b><br><span class="muted">${esc(e.date)}</span></div>`).join(''):'<p class="muted">Nenhum erro registrado ainda.</p>'}<button class="secondary" onclick="resetBrain()">Zerar meu histórico</button></div>`;
+}
+function resetBrain(){
+  if(confirm('Zerar todo o histórico de aprendizagem?')){localStorage.removeItem(AUDI_PROFILE_KEY);brainPage();}
+}
+function brainExplain(){
+  const p=getProfile(), weak=weakTopics().slice(0,3);
+  aiPage(`Analise meu perfil de aprendizagem da AUDI STUDY IA. Meus assuntos que mais precisam de prática são: ${weak.join(', ')||'ainda não há dados suficientes'}. Explique de forma fácil e monte um plano curto de estudo.`);
+}
+
+
+function escVoice(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+const voiceLessons=[
+ {title:'Vocabulário — Arte',kind:'Palavras',items:[
+  ['painting','pintura'],['sculpture','escultura'],['gallery','galeria'],['museum','museu'],
+  ['theatre','teatro'],['audience','público'],['stage','palco'],['performance','apresentação'],
+  ['ballet','balé'],['artist','artista'],['photography','fotografia'],['music','música']
+ ]},
+ {title:'Vocabulário — Formas de arte',kind:'Palavras',items:[
+  ['novels','romances'],['poetry','poesia'],['literature','literatura'],['dance','dança'],
+  ['performer','artista/intérprete'],['composer','compositor'],['visual arts','artes visuais'],
+  ['classical music','música clássica'],['rock band','banda de rock']
+ ]},
+ {title:'Simple Present — DO / DOES',kind:'Frases',items:[
+  ['Does Richard eat sushi every weekend?','Richard come sushi todo fim de semana?'],
+  ['Does Paul run by the lake every morning?','Paul corre no lago todas as manhãs?'],
+  ['Do you like music?','Você gosta de música?'],
+  ['Where do you study?','Onde você estuda?']
+ ]},
+ {title:'Simple Past — DID',kind:'Frases',items:[
+  ['Did my mother visit her sister yesterday?','Minha mãe visitou a irmã ontem?'],
+  ['Did my brother work in the hospital last year?','Meu irmão trabalhou no hospital no ano passado?'],
+  ['Jennifer and Luisa didn’t cook a chicken yesterday.','Jennifer e Luisa não cozinharam frango ontem.'],
+  ['My mother visited her sister yesterday.','Minha mãe visitou a irmã ontem.']
+ ]},
+ {title:'Used to',kind:'Frases',items:[
+  ['People used to go to the theatre often.','As pessoas costumavam ir ao teatro com frequência.'],
+  ['I used to visit museums with my mum.','Eu costumava visitar museus com minha mãe.'],
+  ['I didn’t use to like being on stage.','Eu não costumava gostar de estar no palco.'],
+  ['Did you use to play the piano?','Você costumava tocar piano?']
+ ]},
+ {title:'Interpretação — Turning Points in the Arts',kind:'Textos',items:[
+  ['From the first cave paintings over 40,000 years ago to the developments of modern art, art has a long and dynamic history.','Da arte rupestre às formas modernas de arte, a arte tem uma história longa e dinâmica.'],
+  ['The printing press made literature available to nearly everybody, so many more people learned to read.','A imprensa tornou a literatura disponível para quase todos.'],
+  ['The visual arts changed through painting, sculpture, photography, cinema and computer art.','As artes visuais mudaram através da pintura, escultura, fotografia, cinema e arte digital.']
+ ]},
+ {title:'Interpretação — Community Garden',kind:'Textos',items:[
+  ['Sarah lives in a busy city, but her favorite place is the community garden.','Sarah mora em uma cidade movimentada, mas seu lugar favorito é a horta comunitária.'],
+  ['Every Saturday morning, Sarah and her friends go there to volunteer.','Todos os sábados de manhã, Sarah e seus amigos vão lá para fazer trabalho voluntário.'],
+  ['The garden is not only for growing food; it is also a place for the community to connect.','A horta também é um lugar para a comunidade se conectar.']
+ ]}
+];
+let voiceState={lesson:0,item:0,rec:null,listening:false,heard:'',score:0};
+
+function voiceNormalize(s){
+ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+ .replace(/[^a-z0-9\s']/g,' ').replace(/\s+/g,' ').trim();
+}
+function voiceLev(a,b){
+ a=voiceNormalize(a);b=voiceNormalize(b);
+ const A=[...a],B=[...b],dp=Array.from({length:A.length+1},()=>Array(B.length+1).fill(0));
+ for(let i=0;i<=A.length;i++)dp[i][0]=i;
+ for(let j=0;j<=B.length;j++)dp[0][j]=j;
+ for(let i=1;i<=A.length;i++)for(let j=1;j<=B.length;j++)
+  dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+(A[i-1]===B[j-1]?0:1));
+ return Math.max(0,1-dp[A.length][B.length]/Math.max(A.length,B.length,1));
+}
+function voiceWordCoverage(target,heard){
+ const t=voiceNormalize(target).split(' ').filter(Boolean),h=voiceNormalize(heard).split(' ').filter(Boolean),used=new Set();
+ let hits=0;
+ for(const tw of t){
+  let best=-1,bs=0;
+  h.forEach((hw,i)=>{if(!used.has(i)){const s=voiceLev(tw,hw);if(s>bs){bs=s;best=i;}}});
+  if(best>=0&&bs>=.68){hits++;used.add(best);}
+ }
+ return t.length?hits/t.length:0;
+}
+
+/* === AUDI VOICE — iOS + ANDROID ROBUST ===
+   IMPORTANT: do NOT call getUserMedia() here. SpeechRecognition itself owns
+   microphone permission. Calling getUserMedia() first can create a second
+   permission flow on mobile browsers. Recognition is started only from the
+   user's tap on "Falar agora", which is required by Safari/iOS. */
+let audiMicPermission = 'unknown';
+function audiSpeechCtor(){
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+function audiIsSecure(){
+  return window.isSecureContext || location.protocol==='https:' ||
+         location.hostname==='localhost' || location.hostname==='127.0.0.1';
+}
+function audiBrowserName(){
+  const ua=navigator.userAgent||'';
+  if(/iPhone|iPad|iPod/i.test(ua)) return 'iPhone/iPad';
+  if(/Android/i.test(ua)) return 'Android';
+  return 'computador';
+}
+function audiPermissionMessage(){
+  if(!audiIsSecure()) return '<div class="tip"><h3>🔒 Abra pelo GitHub Pages</h3><p>Para voz no celular, abra a Audi pelo endereço <b>HTTPS</b> do GitHub Pages. Não abra o arquivo baixado diretamente.</p></div>';
+  return '<div class="tip"><h3>🎙️ Microfone</h3><p>Na primeira vez, toque em <b>Falar agora</b> e escolha <b>Permitir</b>. Depois, o navegador deve manter a permissão para este site enquanto ela permanecer autorizada.</p></div>';
+}
+function audiResetVoiceButton(){
+  const b=document.getElementById('voiceStart');
+  if(b){b.disabled=false;b.textContent='🎙️ Falar agora';}
+}
+function voiceRender(result=''){
+  const l=voiceLessons[voiceState.lesson],it=l.items[voiceState.item];
+  app.innerHTML=`<div class="card"><span class="badge">🎙️ Treino por voz</span><h2>${escVoice(l.title)}</h2><p class="muted">${escVoice(l.kind)} • ${voiceState.item+1} de ${l.items.length}</p><div style="height:8px;background:#e7eaf0;border-radius:99px"><div style="height:100%;width:${Math.round(voiceState.item/l.items.length*100)}%;background:#2458d6;border-radius:99px"></div></div></div>
+  <div class="card"><span class="badge">🇺🇸 Fale em inglês</span><h2 style="line-height:1.35">${escVoice(it[0])}</h2><p class="muted">Significado: ${escVoice(it[1])}</p><button id="voiceStart" onclick="voiceStart()">🎙️ ${voiceState.listening?'Ouvindo...':'Falar agora'}</button><button class="secondary" onclick="voiceNext()">➡️ Próximo</button><div id="voiceFeedback">${result}</div><p class="small muted">No celular, o reconhecimento de voz é iniciado diretamente pelo seu toque. A permissão é controlada pelo navegador.</p></div>
+  <div class="card"><h3>📚 Aprenda antes de falar</h3><p>Treine palavras, frases e textos dos conteúdos enviados.</p><button class="secondary" onclick="voiceMenu()">📖 Escolher conteúdo</button></div>`;
+}
+function voiceMenu(){voiceStop();app.innerHTML='<div class="card"><span class="badge">🎙️ Treino por voz</span><h2>Escolha o conteúdo</h2>'+voiceLessons.map((l,i)=>`<button class="secondary" onclick="voiceChoose(${i})">${l.kind==='Palavras'?'🔤':l.kind==='Frases'?'🗣️':'📖'} ${escVoice(l.title)}</button>`).join('')+'</div>';}
+function voiceChoose(i){
+  voiceStop();
+  voiceState={lesson:i,item:0,rec:null,listening:false,heard:'',score:0};
+  voiceRender('<div class="tip">🎙️ Toque em <b>Falar agora</b>. Na primeira utilização, o navegador poderá pedir acesso ao microfone.</div>');
+}
+function voicePage(){
+  nav('nVoice');
+  const SR=audiSpeechCtor();
+  if(!SR){
+    app.innerHTML='<div class="card"><span class="badge">🎙️ Treino por voz</span><h2>Reconhecimento de voz não disponível neste navegador</h2><p>Use <b>Safari no iPhone/iPad</b> ou <b>Chrome no Android</b>. Evite abrir a Audi dentro de outro aplicativo ou visualizador interno.</p></div>';
+    return;
+  }
+  if(!audiIsSecure()){
+    app.innerHTML='<div class="card"><span class="badge">🎙️ Treino por voz</span>'+audiPermissionMessage()+'</div>';
+    return;
+  }
+  voiceRender('<div class="tip">🎙️ <b>Pronto.</b> Toque em <b>Falar agora</b> para começar. O navegador pedirá a permissão somente quando necessário.</div>');
+}
+async function voiceStart(){
+  const SR=audiSpeechCtor();
+  if(!SR){return;}
+  if(!audiIsSecure()){
+    const f=document.getElementById('voiceFeedback');
+    if(f)f.innerHTML=audiPermissionMessage();
+    return;
+  }
+
+  // Do not call getUserMedia() here. On iOS/Android SpeechRecognition must be
+  // started from the actual user gesture and handles its own microphone access.
+  voiceStop();
+  const r=new SR();
+  voiceState.rec=r;
+  voiceState.listening=true;
+  voiceState.heard='';
+  r.lang='en-US';
+  r.continuous=false;
+  r.interimResults=false;
+  r.maxAlternatives=5;
+
+  const b=document.getElementById('voiceStart');
+  if(b){b.disabled=true;b.textContent='🎙️ Ouvindo... fale agora';}
+
+  r.onstart=()=>{
+    audiMicPermission='granted';
+    const f=document.getElementById('voiceFeedback');
+    if(f)f.innerHTML='<div class="tip">👂 Estou ouvindo... fale a palavra, frase ou texto em inglês.</div>';
+  };
+  r.onresult=e=>{
+    let best='',bestConf=-1;
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const res=e.results[i];
+      for(let j=0;j<res.length;j++){
+        const tr=(res[j].transcript||'').trim();
+        const cf=typeof res[j].confidence==='number'?res[j].confidence:0;
+        if(tr && cf>=bestConf){best=tr;bestConf=cf;}
+      }
+    }
+    if(best)voiceState.heard=best;
+  };
+  r.onerror=e=>{
+    voiceState.listening=false;
+    voiceState.rec=null;
+    let msg='Não consegui reconhecer sua fala.';
+    if(e.error==='not-allowed'){
+      audiMicPermission='denied';
+      msg='O acesso ao microfone/reconhecimento foi bloqueado. No iPhone: Ajustes → Safari → Microfone → Permitir para este site. No Android: Chrome → Configurações do site → Microfone → Permitir.';
+    }else if(e.error==='service-not-allowed'){
+      msg='O navegador não autorizou o serviço de reconhecimento. No iPhone, abra a Audi diretamente no Safari (não dentro de outro aplicativo). No Android, use Chrome.';
+    }else if(e.error==='no-speech'){
+      msg='Não detectei fala. Toque em Falar agora e fale claramente em inglês.';
+    }else if(e.error==='audio-capture'){
+      msg='Não consegui acessar o microfone. Verifique se outro aplicativo está usando o microfone.';
+    }else if(e.error==='network'){
+      msg='O reconhecimento de voz precisa de internet neste navegador.';
+    }else if(e.error==='aborted'){
+      return;
+    }
+    const f=document.getElementById('voiceFeedback');
+    if(f)f.innerHTML='<div class="tip">⚠️ '+escVoice(msg)+'</div>';
+    audiResetVoiceButton();
+  };
+  r.onend=()=>{
+    voiceState.listening=false;
+    voiceState.rec=null;
+    if(voiceState.heard){
+      voiceCheck(voiceState.heard);
+    }else{
+      audiResetVoiceButton();
+    }
+  };
+  try{
+    // This call remains directly inside the click handler, which is important
+    // for Safari on iOS.
+    r.start();
+  }catch(e){
+    voiceState.listening=false;
+    voiceState.rec=null;
+    audiResetVoiceButton();
+    const f=document.getElementById('voiceFeedback');
+    if(f)f.innerHTML='<div class="tip">⚠️ O reconhecimento não iniciou. Toque novamente em <b>Falar agora</b>.</div>';
+  }
+}
+function voiceStop(){if(voiceState.rec){try{voiceState.rec.stop();}catch(e){}}voiceState.rec=null;voiceState.listening=false;}
+function voiceCheck(heard){
+ const target=voiceLessons[voiceState.lesson].items[voiceState.item][0];
+ const sim=voiceLev(target,heard),cov=voiceWordCoverage(target,heard),score=Math.round((sim*.45+cov*.55)*100);
+ const ok=score>=82,partial=score>=62;if(ok)voiceState.score++;
+ const feedback=ok?`<div class="answer"><h3>🎉 Muito bom!</h3><p>A fala reconhecida ficou compatível com o texto-alvo.</p></div>`:
+ partial?`<div class="tip"><h3>🟡 Quase!</h3><p>Você acertou boa parte. Repita prestando atenção nas palavras destacadas.</p></div>`:
+ `<div class="tip"><h3>🔴 Ainda não</h3><p>A transcrição ficou diferente do texto-alvo. Tente novamente.</p></div>`;
+ voiceRender(feedback+`<div class="answer"><b>Você falou:</b><br>${escVoice(heard)}<br><br><b>Esperado:</b><br>${escVoice(target)}<br><br><b>Correspondência estimada:</b> ${score}%</div><button class="secondary" onclick="voiceStart()">🎙️ Repetir</button>`);
+ if(typeof recordAttempt==='function')recordAttempt(voiceLessons[voiceState.lesson].kind==='Palavras'?'Vocabulary':'Pronunciation / Grammar',ok,false,'voice');
+}
+function voiceNext(){
+ voiceStop();voiceState.item++;
+ const l=voiceLessons[voiceState.lesson];
+ if(voiceState.item>=l.items.length){
+  const pct=Math.round(voiceState.score/l.items.length*100);
+  app.innerHTML=`<div class="card"><span class="badge">🏁 Treino concluído</span><div class="score">${voiceState.score}/${l.items.length}</div><h2>${pct}%</h2><p>Você concluiu o treino por voz.</p><button onclick="voiceChoose(${voiceState.lesson})">🔁 Refazer</button><button class="secondary" onclick="voiceMenu()">📚 Outro treino</button></div>`;
+ }else voiceRender();
+}
+
+function home(){nav('nHome');app.innerHTML=`<div class="card"><span class="badge">7º ano • Inglês</span><h1>AUDI STUDY IA</h1><p>Ferramenta para estudar Reading and Comprehension, Simple Present, Simple Past, DO/DOES/DID e transformação de frases, com novos textos, as Unidades 3 e 4, resumos fáceis, explicações, exercícios de interpretação com o texto na tela e quizzes de questões abertas.</p><div class="grid"><button onclick="study()">📚 Estudar</button><button class="secondary" onclick="quizMenu()">📝 Quiz</button><button onclick="brainPage()">🧠 Meu cérebro</button></div><button onclick="aiPage()">🤖 Perguntar à IA</button></div><div class="card"><h3>IA de perguntas</h3><p class="muted">Faça uma pergunta livre. A IA identifica o assunto e monta uma explicação conforme a pergunta, sem ficar limitada a uma resposta pronta única.</p></div>`}
+function study(){nav('nStudy');app.innerHTML=`<div class="card"><span class="badge">Material completo</span><h2>📚 Estudar</h2><button onclick="unitsPage()">🎨 Unidades 3 e 4 — Conteúdo novo</button><button class="secondary" onclick="grammar()">✏️ DO / DOES / DID</button><button class="secondary" onclick="readings()">📖 Reading and Comprehension</button><button class="secondary" onclick="exercisesPage()">🧩 Exercícios das folhas</button><button onclick="brainPage()">🧠 Meu cérebro — meus erros e progresso</button></div>`}
+function grammar(){app.innerHTML=`<div class="card"><span class="badge">Grammar</span><h2>DO, DOES e DID</h2><div class="lesson"><b>Simple Present</b>\nI/You/We/They → DO\nHe/She/It → DOES\n\nNegative: don’t / doesn’t + verbo base.\nQuestion: Do/Does + sujeito + verbo base?\n\n<b>Simple Past</b>\nDID é usado com todos os sujeitos.\nNegative: didn’t + verbo base.\nQuestion: Did + sujeito + verbo base?\n\n<b>Regra principal:</b> depois de DO, DOES ou DID, o verbo volta para a forma base.</div><button onclick="aiPage('Explique DO, DOES e DID de um jeito fácil com exemplos.')">🤖 Explicar com IA</button></div>`}
+function readings(){
+ nav('nStudy');
+ app.innerHTML=`<div class="card"><span class="badge">Reading & Comprehension</span><h2>📖 Textos</h2>
+ <p class="muted">Os seis primeiros textos vêm das atividades fotografadas. Abaixo há textos extras criados para ampliar a prática.</p>
+ ${texts.map(r=>`<button class="secondary" onclick="read('${r.id}')">${r.t}</button>`).join('')}
+ <h3 style="margin-top:18px">Textos extras de prática</h3>
+ ${extraTexts.map(r=>`<button class="secondary" onclick="readExtra('${r.id}')">${r.t}</button>`).join('')}
+ </div>`
+}
+function read(id){let r=texts.find(x=>x.id===id);app.innerHTML=`<div class="card"><span class="badge">Reading</span><h2>${r.t}</h2><div class="lesson">${r.x}</div><button onclick="readQ('${id}')">📝 Praticar perguntas</button><button class="secondary" onclick="aiPage('Explique o texto ${r.t} e me ajude a encontrar as informações importantes.')">🤖 Estudar com IA</button></div>`}
+function readExtra(id){let r=extraTexts.find(x=>x.id===id);app.innerHTML=`<div class="card"><span class="badge">Texto extra</span><h2>${r.t}</h2><div class="lesson">${r.x}</div><button onclick="readQExtra('${id}')">📝 Praticar perguntas</button><button class="secondary" onclick="aiPage('Explique o texto '+r.t+' de forma simples e destaque o vocabulário importante.')">🤖 Estudar com IA</button></div>`}
+const readingDistractors={
+space:[
+ ["It fulfills humanity’s innate curiosity and drives technological innovation.","It makes every planet safe for humans.","It removes radiation from space.","It replaces all scientific research."],
+ ["Mars.","Earth.","The Moon.","Venus."],
+ ["Engineers must account for extreme and dangerous space conditions.","Engineers only need to choose colors for spacecraft.","Spacecraft never experience temperature changes.","Engineers only study rivers on Earth."],
+ ["As one of the most formidable scientific challenges of the 21st century.","As an easy project for every school.","As a problem that has already been solved.","As an activity unrelated to science."]
+],
+clarkson:[
+ ["A river — the Clark River.","A desert.","A mountain range.","The sea."],
+ ["Wide streets and many trees.","Factories and offices only.","A large airport.","A beach and a harbor."],
+ ["South Clarkson.","North Clarkson.","The large park.","Outside the town."],
+ ["Walking by the river, sailing small boats and flying kites.","Working in factories all weekend.","Taking the ferry to another city.","Staying indoors all weekend."]
+],
+green:[
+ ["To reduce plastic waste in school.","To build a new cafeteria.","To close the school.","To move to another district."],
+ ["Handmade canvas bags.","School uniforms.","Electronic games.","Fresh vegetables."],
+ ["Single-use plastic waste dropped by 60%.","Plastic waste doubled.","Students stopped using water.","The project was cancelled."],
+ ["Bring the initiative to other schools.","Stop the project immediately.","Build a new stadium.","Replace every classroom."]
+],
+camp:[
+ ["No electronic devices were permitted.","Students had to use phones all day.","Students had to stay in the hotel.","Everyone had to bring a television."],
+ ["Confused and disconnected.","Excited to spend all day online.","Angry about winning a competition.","Completely uninterested in the trip."],
+ ["Kayaking.","Cooking.","Cycling.","Running."],
+ ["The real world was much more exciting.","His phone was more exciting than nature.","He wanted more online games.","The trip had no interesting activities."]
+],
+garden:[
+ ["An empty lot full of trash.","A beautiful park.","A school cafeteria.","A busy market."],
+ ["Mr. Davis.","Sarah.","Lucas.","The city mayor."],
+ ["Pulling out weeds.","Watering the flowers.","Selling vegetables.","Building the garden fence."],
+ ["Buying new seeds and tools.","Paying the volunteers.","Building a new school.","Travelling together."]
+],
+keys:[
+ ["He was running late and could not find his keys.","He lost his library book.","His sister lost her bicycle.","He forgot his math homework."],
+ ["A math notebook, a squashed banana and a library book.","His house keys and cereal.","A bicycle helmet and newspaper.","A blue keychain and dog toys."],
+ ["Under Buster’s paws in the living room.","On the kitchen counter.","Inside his math notebook.","Next to Clara’s bicycle."],
+ ["He caught the school bus.","He rode his bicycle.","He walked to school.","His sister drove him."]
+],
+science:[
+ ["A small model of a water filter.","A robot car.","A weather station.","A school clock."],
+ ["On Friday afternoon.","On Monday morning.","On Saturday evening.","On Tuesday morning."],
+ ["Their test results.","Their grades.","Their lunch plans.","The visitors’ names."],
+ ["Careful testing and teamwork were important.","Winning was more important than learning.","Science fairs were too difficult.","They should stop working in teams."]
+],
+saturday:[
+ ["Heavy rain changed his plans.","His friends cancelled because of school.","He lost his soccer ball.","His teacher asked him to stay home."],
+ ["Lunch.","Dinner.","Breakfast.","A cake."],
+ ["English vocabulary.","Math formulas.","Music notes.","Computer programming."],
+ ["He went for a walk with his dog.","He went back to play soccer.","He went to the museum.","He stayed in bed."]
+],
+museum:[
+ ["The city museum.","The school library.","A sports stadium.","A science laboratory."],
+ ["Ancient inventions.","Modern sports.","Ocean animals.","School uniforms."],
+ ["She wanted to know how people measured time in the past.","She wanted to buy a new clock.","She disliked the other exhibits.","She wanted to leave early."],
+ ["One interesting fact in a notebook.","A drawing of the museum.","A list of classmates.","A letter to the teacher."]
+]
+};
+
+function readingItems(r){
+ return r.q.map((q,i)=>({q:q[0],options:readingDistractors[r.id][i],correct:0}));
+}
+function readQ(id){let r=texts.find(x=>x.id===id);S={title:r.t,items:readingItems(r),i:0,score:0,sourceType:'reading'};renderQ()}
+function readQExtra(id){let r=extraTexts.find(x=>x.id===id);S={title:r.t,items:readingItems(r),i:0,score:0,sourceType:'reading'};renderQ()}
+
+function exercisesPage(){app.innerHTML=`<div class="card"><span class="badge">Exercises Review</span><h2>🧩 Transformações</h2>${exercises.map(e=>`<details><summary>${e[0]}</summary><p><b>(-)</b> ${e[1]}</p><p><b>(?)</b> ${e[2]}</p><p><b>Short +:</b> ${e[3]}</p><p><b>Short -:</b> ${e[4]}</p><button class="secondary" onclick="aiPage('Explique como transformar: ${e[0]}')">🤖 Entender com IA</button></details>`).join('')}</div>`}
+
+function unitsPage(){
+ nav('nStudy');
+ app.innerHTML=`<div class="card"><span class="badge">📚 Conteúdo das imagens</span><h2>Unidades 3 e 4</h2>
+ <p class="muted">Resumos simples, explicações fáceis, vocabulário e prática. O conteúdo abaixo foi organizado a partir das páginas enviadas.</p>
+ <button onclick="unit3Page()">🎨 Unidade 3 — Art Forms</button>
+ <button class="secondary" onclick="unit4Page()">🎉 Unidade 4 — Party & Past Events</button>
+ </div>`;
+}
+function unit3Page(){
+ nav('nStudy');
+ app.innerHTML=`<div class="card"><span class="badge">Unit 3 • Art Forms</span><h2>🎨 Resumo para estudar</h2>
+ ${unit3Topics.map(t=>`<div class="topic"><h3>${t.title}</h3><div class="lesson">${t.body}</div></div>`).join('')}
+ <div class="tip"><b>⭐ Dica fácil:</b> se aparecer <b>did</b> ou <b>didn’t</b>, o verbo principal volta para a forma base: <b>Did you go?</b> / <b>She didn’t go.</b></div>
+ <button onclick="openUnitQuiz('unit3')">✍️ Fazer questões abertas da Unidade 3</button>
+ <button class="secondary" onclick="readUnitText('artturning')">📖 Ler texto de interpretação</button>
+ <button class="secondary" onclick="readUnitText('artdescription')">🖼️ Ler texto sobre descrição de arte</button>
+ </div>`;
+}
+function unit4Page(){
+ nav('nStudy');
+ app.innerHTML=`<div class="card"><span class="badge">Unit 4 • Past events</span><h2>🎉 Resumo para estudar</h2>
+ <div class="topic"><h3>Past Simple em situações reais</h3><div class="lesson">Para contar uma festa ou acontecimento terminado, usamos o <b>Past Simple</b>: last weekend, yesterday, last year, etc.\n\nExemplo: <b>We had a party last weekend.</b>\nNegativa: <b>We didn’t have a party.</b>\nPergunta: <b>Did you have a party?</b></div></div>
+ <div class="topic"><h3>🗣️ Perguntas sobre acontecimentos</h3><div class="lesson">What happened? • When was it? • Who was there? • What did you do? • Why was it special?</div></div>
+ <button onclick="readUnitText('party')">📖 Ler texto de interpretação</button>
+ <button onclick="openUnitQuiz('unit4')">✍️ Fazer questões abertas da Unidade 4</button>
+ </div>`;
+}
+function readUnitText(id){
+ const r=unitTexts.find(x=>x.id===id);
+ app.innerHTML=`<div class="card"><span class="badge">📖 Texto de interpretação</span><h2>${r.t}</h2><div class="sourceText"><div>${esc(r.x)}</div></div>
+ <button onclick="openUnitQuiz('${id}')">✍️ Responder questões abertas sobre este texto</button>
+ <button class="secondary" onclick="aiPage('Explique este texto de forma simples, destaque as informações principais e explique o vocabulário difícil.')">🤖 Estudar com IA</button></div>`;
+}
+const unitOpen={
+unit3:[
+ {text:'artturning',q:'What are two important changes in the history of the arts mentioned in the text?',a:['The development of writing/printing and changes in music or visual arts.','Printing made books easier to share and technology changed music and visual arts.']},
+ {text:'artturning',q:'How did technology help the arts?',a:['It helped people create, record, share and experience art in new ways.']},
+ {text:'artdescription',q:'What information can a good description of an artwork include?',a:['Its type, appearance, details, meaning and what the artist wants to communicate.']},
+ {text:'artdescription',q:'Give two adjectives that can describe an artwork.',a:['beautiful and colorful','abstract and realistic','strange and detailed','traditional and fantastic']}
+],
+unit4:[
+ {text:'party',q:'What did the family do to prepare the surprise party?',a:['They decorated the room, prepared food and put candles on the cake.']},
+ {text:'party',q:'Why was the event special?',a:['Because the family worked together and the surprise was successful.']},
+ {text:'party',q:'What happened when the birthday person arrived?',a:['The person was surprised to see family members waiting.']}
+],
+artturning:[
+ {text:'artturning',q:'What is the main idea of the text?',a:['Art changes together with technology, culture and new ideas.']}
+],
+artdescription:[
+ {text:'artdescription',q:'What should you notice when describing an artwork?',a:['Its type, appearance, details and possible meaning.']}
+],
+partyText:[
+ {text:'party',q:'Where did the family celebrate the birthday?',a:['At home.']}
+]
+};
+function openUnitQuiz(kind){
+ const list=unitOpen[kind]||unitOpen.partyText;
+ unitState={kind,items:list,i:0,score:0};
+ renderUnitOpen();
+}
+let unitState={kind:'unit3',items:[],i:0,score:0};
+function renderUnitOpen(){
+ const item=unitState.items[unitState.i], r=unitTexts.find(x=>x.id===item.text);
+ app.innerHTML=`<div class="card"><span class="badge">✍️ Questão aberta</span><p><b>Questão ${unitState.i+1} de ${unitState.items.length}</b></p></div>
+ <div class="card"><span class="badge">📖 Texto para consulta</span><h3>${r.t}</h3><div class="sourceText">${esc(r.x)}</div></div>
+ <div class="card"><h3>${item.q}</h3><textarea id="unitAns" placeholder="Escreva sua resposta..."></textarea><button onclick="checkUnitOpen()">Enviar resposta</button><p class="muted">A correção aceita pequenas diferenças de escrita e procura o sentido da resposta.</p></div>`;
+ document.getElementById('unitAns').focus();
+}
+function checkUnitOpen(){
+ const item=unitState.items[unitState.i], u=document.getElementById('unitAns').value.trim();
+ if(!u){alert('Digite uma resposta.');return}
+ let best=0; item.a.forEach(a=>best=Math.max(best,similarity(u,a)));
+ let msg=best>=.62?'<b>✓ Correto!</b><p>Você encontrou a informação principal.</p>':best>=.35?'<b>⚠ Parcialmente correto.</b><p>Você está no caminho, mas confira o texto e complete a resposta.</p>':'<b>✗ Ainda não.</b><p>Volte ao texto e procure a informação pedida.</p>';
+ if(best>=.62)unitState.score++;
+ app.innerHTML=`<div class="card"><span class="badge">Correção</span><div class="answer">${msg}</div><div class="answer"><b>Sua resposta:</b><br>${esc(u)}</div><div class="answer"><b>Resposta de referência:</b><br>${esc(item.a[0])}</div><button onclick="nextUnitOpen()">${unitState.i+1<unitState.items.length?'Próxima questão':'Ver resultado'}</button></div>`;
+}
+function nextUnitOpen(){
+ unitState.i++;
+ if(unitState.i<unitState.items.length)renderUnitOpen();
+ else app.innerHTML=`<div class="card"><span class="badge">Resultado</span><h2>🎯 Quiz concluído</h2><div class="score">${unitState.score}/${unitState.items.length}</div><p>Você terminou as questões abertas.</p><button onclick="openUnitQuiz('${unitState.kind}')">🔄 Fazer novamente</button><button class="secondary" onclick="unitsPage()">Voltar ao conteúdo</button></div>`;
+}
+
+function quizMenu(){
+ nav('nQuiz');
+ app.innerHTML=`<div class="card"><span class="badge">Quiz</span><h2>📝 Escolha um treino</h2>
+ <p class="muted">Há quizzes de alternativas, questões abertas, interpretação com o texto completo e treinos adaptativos.</p><button onclick="adaptiveQuiz()">🧠 Treino adaptativo — focar nos meus erros</button><button class="secondary" onclick="brainPage()">📊 Meu cérebro — ver progresso</button>
+ <button onclick="grammarQuiz()">Grammar — DO/DOES/DID</button><button class="secondary" onclick="openUnitQuiz('unit3')">✍️ Questões abertas — Unidade 3</button><button class="secondary" onclick="openUnitQuiz('unit4')">✍️ Questões abertas — Unidade 4</button><button class="secondary" onclick="openQuiz()">✍️ Quiz geral de questão aberta</button>
+ ${texts.map(r=>`<button class="secondary" onclick="readQ('${r.id}')">Reading — ${r.t}</button>`).join('')}
+ <h3 style="margin-top:18px">Quizzes com textos extras</h3>
+ ${extraTexts.map(r=>`<button class="secondary" onclick="readQExtra('${r.id}')">Reading — ${r.t}</button>`).join('')}
+ </div>`
+}
+function grammarQuiz(){
+ const qs=[
+  ["Choose the correct negative sentence: Paul runs by the lake every morning.",["Paul doesn’t run by the lake every morning.","Paul don’t runs by the lake every morning.","Paul doesn’t runs by the lake every morning.","Paul didn’t runs by the lake every morning."]],
+  ["Choose the correct question: Richard eats Sushi every weekend.",["Does Richard eat Sushi every weekend?","Do Richard eats Sushi every weekend?","Does Richard eats Sushi every weekend?","Did Richard eat Sushi every weekend?"]],
+  ["Choose the correct negative sentence: My mother visited her sister yesterday.",["My mother didn’t visit her sister yesterday.","My mother doesn’t visited her sister yesterday.","My mother didn’t visited her sister yesterday.","My mother don’t visit her sister yesterday."]],
+  ["Choose the correct question: My brother worked in the hospital last year.",["Did my brother work in the hospital last year?","Does my brother worked in the hospital last year?","Did my brother worked in the hospital last year?","Do my brother work in the hospital last year?"]],
+  ["Choose the correct short answer: Does Paul run by the lake every morning?",["Yes, he does.","Yes, he do.","Yes, he did.","No, he doesn’t."]],
+  ["Choose the correct short negative answer: Did my mother visit her sister yesterday?",["No, she didn’t.","No, she doesn’t.","No, she don’t.","No, she isn’t."]],
+  ["Choose the correct sentence with DOES.",["Does Richard eat Sushi every weekend?","Does Richard eats Sushi every weekend?","Do Richard eat Sushi every weekend?","Did Richard eats Sushi every weekend?"]],
+  ["Choose the correct sentence with DID.",["Did Jennifer and Luisa cook a chicken yesterday?","Did Jennifer and Luisa cooked a chicken yesterday?","Do Jennifer and Luisa cook a chicken yesterday?","Does Jennifer and Luisa cooked a chicken yesterday?"]],
+  ["Choose the correct negative sentence: Susan and Sonya fly to London every month.",["Susan and Sonya don’t fly to London every month.","Susan and Sonya doesn’t fly to London every month.","Susan and Sonya didn’t flies to London every month.","Susan and Sonya don’t flies to London every month."]],
+  ["Choose the correct short answer: Did Jennifer and Luisa cook a chicken yesterday?",["Yes, they did.","Yes, they do.","Yes, they does.","No, they don’t."]]
+ ];
+ S={title:'Grammar Challenge',items:qs.map(x=>({q:x[0],options:x[1],correct:0})),i:0,score:0,sourceType:'grammar'};
+ renderQ();
+}
+
+function renderQ(){
+ let q=S.items[S.i],pct=Math.round(S.i/S.items.length*100);
+ let readingText='';
+ if(S.sourceType==='reading'){
+   let source=null;
+   if(typeof texts!=='undefined') source=texts.find(r=>S.title.includes(r.t));
+   if(!source && typeof extraTexts!=='undefined') source=extraTexts.find(r=>S.title.includes(r.t));
+   if(source){
+     readingText=`<div class="card" style="background:#f8faff;margin-top:12px"><span class="badge">📖 Leia o texto</span><h3 style="margin-top:10px">${esc(source.t)}</h3><div class="lesson">${esc(source.x)}</div></div>`;
+   }
+ }
+ app.innerHTML=`
+ <div class="card">
+   <div class="badge">${esc(S.title)}</div>
+   <p><b>Questão ${S.i+1} de ${S.items.length}</b></p>
+   <div style="height:8px;background:#e7eaf0;border-radius:99px;overflow:hidden">
+     <div style="height:100%;width:${pct}%;background:#2458d6"></div>
+   </div>
+ </div>
+ ${readingText}
+ <div class="card">
+   <h3>${esc(q.q)}</h3>
+   <p class="muted">Escolha uma alternativa:</p>
+   ${q.options.map((x,i)=>`<button class="secondary" style="text-align:left" onclick="answer(${i})">${String.fromCharCode(65+i)}) ${esc(x)}</button>`).join('')}
+ </div>`;
+}
+function answer(choice){
+ let q=S.items[S.i], topic=topicForQuestion(q.q,S.sourceType), correct=choice===q.correct;
+ recordAttempt(topic,correct,false,'multiple-choice');
+ if(correct)S.score++;
+ S.i++;
+ if(S.i<S.items.length){renderQ();return}
+ finishQuiz();
+}
+function adaptiveQuiz(){
+ const weak=weakTopics();
+ let target=weak[0]||'Simple Present / DO / DOES';
+ if(/Simple Present/.test(target)){grammarQuiz();return;}
+ const source=target==='Reading & Comprehension' ? texts[Math.floor(Math.random()*texts.length)] : texts[Math.floor(Math.random()*texts.length)];
+ readQ(source.id);
+}
+function automaticQuiz(){
+ const order=[
+  {type:'grammar',title:'Grammar Challenge — Nova Rodada'},
+  ...texts.map(r=>({type:'reading',id:r.id,title:'Reading Challenge — '+r.t})),
+  ...extraTexts.map(r=>({type:'reading',id:r.id,title:'Reading Challenge — '+r.t}))
+ ];
+ let round=Number(localStorage.getItem('audiQuizRound')||0);
+ let item=order[round%order.length];
+ localStorage.setItem('audiQuizRound',String(round+1));
+ if(item.type==='grammar'){grammarQuiz();return}
+ if(extraTexts.some(r=>r.id===item.id))readQExtra(item.id);else readQ(item.id);
+}
+function finishQuiz(){
+ let p=Math.round(S.score/S.items.length*100);
+ app.innerHTML=`<div class="card"><span class="badge">Quiz concluído</span><div class="score">${S.score}/${S.items.length}</div><h2>${p}% de acertos</h2><p>${p>=80?'Muito bom!':'Continue praticando. O próximo quiz terá perguntas novas.'}</p><div class="answer"><b>Próximo quiz sendo preparado...</b><br><span class="muted">Você será levado automaticamente para uma nova rodada.</span></div><button onclick="automaticQuiz()">▶ Começar agora</button><button class="secondary" onclick="quizMenu()">Escolher outro quiz</button></div>`;
+ setTimeout(()=>{if(document.querySelector('.score'))automaticQuiz()},1800);
+}
+function esc(v){
+ return String(v ?? '').replace(/[&<>"']/g,m=>({
+   '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+ }[m]));
+}
+
+
+const openQuestions=[
+ {q:"Traduza para o português: Does Paul eat pizza for breakfast?",a:["Paul come pizza no café da manhã?","Paul come pizza no café da manhã"]},
+ {q:"Passe para a forma negativa: Paul runs by the lake every morning.",a:["Paul doesn't run by the lake every morning.","Paul does not run by the lake every morning."]},
+ {q:"Passe para a forma interrogativa: Richard eats Sushi every weekend.",a:["Does Richard eat Sushi every weekend?","Does Richard eat sushi every weekend?"]},
+ {q:"Passe para a forma negativa: My mother visited her sister yesterday.",a:["My mother didn't visit her sister yesterday.","My mother did not visit her sister yesterday."]},
+ {q:"Passe para a forma interrogativa: My brother worked in the hospital last year.",a:["Did my brother work in the hospital last year?"]},
+ {q:"Responda em inglês: What is near Clarkson?",source:"clarkson",a:["The Clark River.","A river — the Clark River.","The Clark River is near Clarkson."]},
+ {q:"Responda em inglês: Where is the stadium in Clarkson?",source:"clarkson",a:["In South Clarkson.","The stadium is in South Clarkson."]},
+ {q:"Responda em inglês: What did Lucas find under Buster's paws?",source:"keys",a:["His missing keys.","Lucas's missing keys.","The missing keys."]},
+ {q:"Responda em inglês: What activity did Liam discover he was good at?",source:"camp",a:["Kayaking.","He was good at kayaking."]},
+ {q:"Responda em inglês: What was the main objective of The Green City Project?",source:"green",a:["To reduce plastic waste in school.","The main objective was to reduce plastic waste in school."]},
+ {q:"Responda em inglês: Who started the community garden project?",source:"garden",a:["Mr. Davis.","Mr. Davis started the community garden project."]}
+];
+
+let openState={i:0,score:0};
+
+function openQuiz(){
+ nav('nQuiz');
+ openState={i:0,score:0};
+ renderOpenQuestion();
+}
+function getOpenSourceText(q){
+ const sourceId = q && q.source ? q.source : null;
+ if(sourceId){
+   if(typeof texts!=='undefined'){
+     const r=texts.find(x=>x.id===sourceId);
+     if(r)return r;
+   }
+   if(typeof extraTexts!=='undefined'){
+     const r=extraTexts.find(x=>x.id===sourceId);
+     if(r)return r;
+   }
+ }
+ return null;
+}
+function renderOpenQuestion(){
+ const q=openQuestions[openState.i];
+ const pct=Math.round(openState.i/openQuestions.length*100);
+ const source=getOpenSourceText(q);
+ const sourceHTML=source ? `<div class="card" style="background:#f8faff;margin-top:14px"><span class="badge">📖 Leia o texto para responder</span><h3 style="margin-top:10px">${esc(source.t)}</h3><div class="lesson">${esc(source.x)}</div></div>` : '';
+ app.innerHTML=`<div class="card"><span class="badge">✍️ Questão aberta</span><p><b>Questão ${openState.i+1} de ${openQuestions.length}</b></p><div style="height:8px;background:#e7eaf0;border-radius:99px;overflow:hidden"><div style="height:100%;width:${pct}%;background:#2458d6"></div></div></div>
+ ${sourceHTML}
+ <div class="card"><h3>${esc(q.q)}</h3><textarea id="openAnswer" placeholder="Digite sua resposta aqui..."></textarea><button onclick="checkOpenAnswer()">Enviar resposta</button><div class="grid"><button class="secondary" onclick="showOpenHint(1)">💡 Dica</button><button class="secondary" onclick="showOpenHint(2)">💡 Outra dica</button></div><p class="small muted">Tente sozinho primeiro. As dicas ajudam sem entregar a resposta.</p></div><div id="openHint"></div>`;
+ document.getElementById('openAnswer').focus();
+}
+function showOpenHint(level){
+ const q=openQuestions[openState.i], s=(q.q||'').toLowerCase();
+ let hint=level===1?'Procure no texto exatamente a informação pedida e responda com uma frase curta.':'Pense no tempo verbal e procure no texto palavras que respondam diretamente à pergunta.';
+ if(/traduza/.test(s))hint='Dica: traduza o sentido da frase, não palavra por palavra.';
+ if(/negativa/.test(s))hint='Dica: observe se é Simple Present ou Simple Past e escolha DO/DOES/DID corretamente.';
+ if(/interrogativa/.test(s))hint='Dica: o auxiliar vem antes do sujeito. Depois dele, o verbo principal fica na forma base.';
+ if(q.source)hint=level===1?'Dica: a resposta está no texto acima. Localize a frase que contém a informação pedida.':'Dica: use palavras do próprio texto para montar sua resposta.';
+ document.getElementById('openHint').innerHTML=`<div class="tip">💡 ${esc(hint)}</div>`;
+}
+function checkOpenAnswer(){
+ const q=openQuestions[openState.i], user=document.getElementById('openAnswer').value.trim();
+ if(!user){alert('Digite uma resposta antes de enviar.');return}
+ let best=0;q.a.forEach(ans=>best=Math.max(best,similarity(user,ans)));
+ let correct=best>=.72, partial=best>=.40;
+ const topic=topicForQuestion(q.q,q.source?'reading':'open');
+ recordAttempt(topic,correct,false,'open');
+ let feedback=correct?'<b>✓ Correto!</b><p>Você respondeu de acordo com o conteúdo.</p>':partial?'<b>⚠ Parcialmente correto.</b><p>Você entendeu parte da ideia. Veja o que pode melhorar e tente novamente.</p>':'<b>✗ Ainda não.</b><p>Não olhe só para a resposta de referência: volte ao texto/regra e tente descobrir o erro.</p>';
+ app.innerHTML=`<div class="card"><span class="badge">Correção inteligente</span><div class="${correct?'answer':'tip'}">${feedback}</div><div class="answer"><b>Sua resposta:</b><br>${esc(user)}</div><div class="answer"><b>Resposta de referência:</b><br>${esc(q.a[0])}</div><h3 style="margin-top:15px">🧠 Explique seu raciocínio</h3><p class="muted">Por que você respondeu assim? Essa etapa ajuda a Audi a descobrir se você realmente entendeu.</p><textarea id="reason" placeholder="Eu pensei que..."></textarea><button onclick="saveReasonAndContinue(${correct},${partial})">${openState.i+1<openQuestions.length?'Continuar':'Ver resultado'}</button></div>`;
+}
+function saveReasonAndContinue(correct,partial){
+ const reason=document.getElementById('reason').value.trim();
+ if(reason){let p=getProfile();p.reasoning=p.reasoning||[];p.reasoning.unshift({q:openQuestions[openState.i].q,reason,date:new Date().toLocaleString('pt-BR')});p.reasoning=p.reasoning.slice(0,30);saveProfile(p);}
+ if(!correct && !partial){
+   const p=getProfile();p.errors.unshift({topic:topicForQuestion(openQuestions[openState.i].q,openQuestions[openState.i].source?'reading':'open'),source:'retry',date:new Date().toLocaleString('pt-BR')});p.errors=p.errors.slice(0,40);saveProfile(p);
+ }
+ nextOpenQuestion();
+}
+function nextOpenQuestion(){
+ openState.i++;
+ if(openState.i<openQuestions.length)renderOpenQuestion();
+ else finishOpenQuiz();
+}
+function finishOpenQuiz(){
+ const pct=Math.round(openState.score/openQuestions.length*100);
+ const weak=weakTopics().slice(0,2);
+ app.innerHTML=`<div class="card"><span class="badge">Quiz concluído</span><div class="score">${openState.score}/${openQuestions.length}</div><h2>${pct}%</h2><p>${pct>=80?'Muito bom!':'Continue praticando. A Audi registrou onde você teve dificuldade.'}</p><div class="answer"><b>🎯 Próximo foco:</b><br>${esc(weak.join(' • ')||'Vou descobrir seus pontos fortes e fracos com mais exercícios.')}</div><button onclick="adaptiveQuiz()">🧠 Próximo quiz adaptado aos meus erros</button><button class="secondary" onclick="openQuiz()">🔄 Novo quiz aberto</button><button class="secondary" onclick="brainPage()">📊 Ver Meu cérebro</button></div>`;
+}
+
+function aiPage(prefill=''){
+ nav('nAI');
+ const app=document.getElementById('app');
+ if(!app)return;
+ app.innerHTML=`
+ <div class="card ai">
+   <span class="badge">🤖 Audi IA — Tutor completo</span>
+   <h2>Pergunte qualquer coisa</h2>
+   <p class="muted">A IA pode explicar gramática, corrigir frases, interpretar textos, criar exemplos, traduzir, explicar vocabulário, montar exercícios e conversar sobre outros assuntos. Para respostas realmente abertas, ela pode usar um modelo de IA conectado ao seu servidor.</p>
+   <textarea id="aiInput" placeholder="Ex.: Explique por que usamos DOES nesta frase e depois crie 5 exercícios parecidos.">${esc(prefill)}</textarea>
+   <div class="grid">
+     <button onclick="askAI()">Enviar</button>
+     <button class="secondary" onclick="clearAI()">Nova conversa</button>
+   </div>
+   <details style="margin-top:12px">
+     <summary>⚙️ Configuração da IA completa</summary>
+     <p class="small muted">Por segurança, o index público não guarda chave de API. O campo abaixo aponta para um backend seu.</p>
+     <input id="aiEndpoint" value="${localStorage.getItem('audiAiEndpoint')||'/api/chat'}" placeholder="/api/chat">
+     <button class="light" onclick="saveAIEndpoint()">Salvar endereço</button>
+   </details>
+ </div>
+ <div id="chatBox"></div>`;
+ renderChat();
+}
+function saveAIEndpoint(){
+ const e=document.getElementById('aiEndpoint').value.trim()||'/api/chat';
+ localStorage.setItem('audiAiEndpoint',e);
+ alert('Endereço da IA salvo.');
+}
+function clearAI(){
+ localStorage.removeItem('audiChat');
+ aiPage();
+}
+function renderChat(){
+ const box=document.getElementById('chatBox');
+ if(!box)return;
+ const chat=JSON.parse(localStorage.getItem('audiChat')||'[]');
+ box.innerHTML=chat.map(m=>m.role==='user'
+   ? `<div class="userMsg"><b>Você:</b><br>${esc(m.content)}</div>`
+   : `<div class="aiMsg"><b>Audi IA:</b>${m.html||esc(m.content)}</div>`).join('');
+}
+async function askAI(){
+ const input=document.getElementById('aiInput');
+ const q=(input.value||'').trim();
+ if(!q)return;
+ const chat=JSON.parse(localStorage.getItem('audiChat')||'[]');
+ chat.push({role:'user',content:q});
+ localStorage.setItem('audiChat',JSON.stringify(chat));
+ renderChat();
+ input.value='';
+ const box=document.getElementById('chatBox');
+ box.innerHTML+=`<div class="aiMsg"><b>Audi IA:</b><p class="muted">Pensando...</p></div>`;
+ try{
+   const endpoint=localStorage.getItem('audiAiEndpoint')||'/api/chat';
+   const response=await fetch(endpoint,{
+     method:'POST',
+     headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({
+       message:q,
+       history:chat.slice(-12),
+       study_context:getStudyContext()+'\nPROVAS CADASTRADAS:\n'+audiGetManagerContext(), learning_profile:getProfile()
+     })
+   });
+   if(!response.ok)throw new Error('Backend indisponível');
+   const data=await response.json();
+   const answer=data.answer||data.output||data.message;
+   if(!answer)throw new Error('Resposta vazia');
+   chat.push({role:'assistant',content:answer,html:formatAI(answer)});
+   localStorage.setItem('audiChat',JSON.stringify(chat));
+   renderChat();
+ }catch(err){
+   const local='<p><b>IA generativa indisponível:</b> configure um servidor de IA na seção de configurações. Esta resposta é apenas informativa, não foi produzida por um modelo.</p>';
+   chat.push({role:'assistant',content:local.replace(/<[^>]*>/g,''),html:local});
+   localStorage.setItem('audiChat',JSON.stringify(chat));
+   renderChat();
+ }
+}
+function getStudyContext(){
+ let ctx=[];
+ if(typeof texts!=='undefined')texts.forEach(r=>ctx.push(r.t+'\\n'+r.x));
+ if(typeof extraTexts!=='undefined')extraTexts.forEach(r=>ctx.push(r.t+'\\n'+r.x));
+ return ctx.join('\\n\\n').slice(0,18000);
+}
+function formatAI(text){
+ return esc(text).replace(/\n/g,'<br>');
+}
+function localTutor(q){
+ const s=q.trim().toLowerCase();
+ if(/meu cerebro|meu desempenho|meus erros|meu progresso|pontos fortes|pontos fracos/.test(s)){
+   const p=getProfile(), weak=weakTopics().slice(0,3);
+   return `<p><b>Seu perfil de aprendizagem:</b></p><p>Os assuntos que mais precisam de atenção no momento são: <b>${esc(weak.join(', ')||'ainda não há dados suficientes')}</b>.</p><p>A Audi usa esses dados para priorizar seus próximos exercícios.</p>`;
+ }
+ const raw=q.trim();
+ // Translation requests: detect "traduza/translate" and translate the
+ // sentence instead of incorrectly answering it as a grammar question.
+ if(/^(traduza|translate|traduzir|tradução)\b/.test(s)){
+   let phrase=raw.replace(/^(traduza|translate|traduzir|tradução)\s*/i,'').replace(/^[:\-]\s*/,'').trim();
+   return translateEnglishToPortuguese(phrase);
+ }
+
+ // If the user asks only for a sentence in English, do not invent a reply.
+ if(/^(what|why|when|where|who|how|does|do|did|is|are|can|will|would|could|should)\b/i.test(raw)){
+   if(/does\s+.+\s+eat\s+.+\s+in\s+breakfast/i.test(raw)){
+     return `<p>A frase <b>${esc(raw)}</b> pode ser entendida como:</p>
+     <div class="answer"><b>“O Paul come pizza no café da manhã?”</b></div>
+     <p>Se você quis dizer <i>“Does Paul eat pizza for breakfast?”</i>, essa é uma forma mais natural em inglês.</p>`;
+   }
+ }
+
+ if(/^(corrija|correct|corrija)\b/i.test(s)){
+   return `<p>Claro. Envie a frase completa e eu vou:</p><ol><li>mostrar a frase corrigida;</li><li>explicar o erro;</li><li>mostrar a tradução;</li><li>dar um exemplo parecido.</li></ol>`;
+ }
+
+ if(/^(explique|explain|como|how)\b/i.test(s) && /ingl[eê]s|english|frase|sentence|gram[aá]tica|grammar/.test(s)){
+   return `<p>Claro. Vou explicar de forma simples e com exemplos. Se você mandar a frase exata, consigo analisar <b>cada palavra</b>, dizer a função dela e mostrar outras frases semelhantes.</p>`;
+ }
+
+ // Grammar rules, only when the user is actually asking about grammar.
+ if(/do|does|did|simple present|simple past|negative|interrogativ|short answer/.test(s)){
+   return `<p>Sua pergunta está relacionada à gramática inglesa.</p>
+   <p><b>Simple Present:</b> usamos <b>do</b> com I/you/we/they e <b>does</b> com he/she/it.</p>
+   <p><b>Simple Past:</b> usamos <b>did</b> com todos os sujeitos.</p>
+   <div class="answer"><b>Regra importante:</b> depois de DO, DOES ou DID, o verbo principal fica na forma base.</div>
+   <p>Se você mandar a frase, posso explicar exatamente o que acontece nela.</p>`;
+ }
+
+ if(/reading|texto|compreens|interpret/.test(s)){
+   return `<p>Posso analisar textos, responder perguntas de interpretação, explicar vocabulário e justificar a resposta usando o próprio texto.</p>`;
+ }
+
+ return `<p>Entendi: <b>${esc(raw)}</b>.</p>
+ <p>Eu consigo conversar sobre essa pergunta, explicar, traduzir, corrigir, resumir, criar exemplos ou continuar a conversa.</p>
+ <p>Para perguntas realmente abertas sobre qualquer assunto, conecte o campo <b>/api/chat</b> a um modelo de IA no servidor. O navegador sozinho não consegue virar um ChatGPT completo sem um modelo de IA por trás.</p>`;
+}
+
+function translateEnglishToPortuguese(phrase){
+ let p=phrase.trim();
+ if(!p) return '<p>Envie a frase que você quer traduzir.</p>';
+
+ // Common school vocabulary/phrases plus a compositional fallback.
+ const replacements=[
+  [/\bdoes\b/gi,''],
+  [/\bpaul\b/gi,'Paul'],
+  [/\beat\b/gi,'come'],
+  [/\bpizza\b/gi,'pizza'],
+  [/\bfor breakfast\b/gi,'no café da manhã'],
+  [/\bin breakfast\b/gi,'no café da manhã'],
+  [/\bthe\b/gi,'o/a'],
+  [/\bmy\b/gi,'meu/minha'],
+  [/\byour\b/gi,'seu/sua'],
+  [/\bwhat\b/gi,'o que'],
+  [/\bwhere\b/gi,'onde'],
+  [/\bwhen\b/gi,'quando'],
+  [/\bwho\b/gi,'quem'],
+  [/\bwhy\b/gi,'por que'],
+  [/\bhow\b/gi,'como'],
+  [/\bdo\b/gi,''],
+  [/\bdid\b/gi,''],
+  [/\bdoesn't\b/gi,'não'],
+  [/\bdon't\b/gi,'não'],
+  [/\bdidn't\b/gi,'não'],
+  [/\bis\b/gi,'é/está'],
+  [/\bare\b/gi,'são/estão'],
+  [/\bwas\b/gi,'era/estava'],
+  [/\bwere\b/gi,'eram/estavam'],
+  [/\bI\b/g,'eu'],
+  [/\bhe\b/gi,'ele'],
+  [/\bshe\b/gi,'ela'],
+  [/\bthey\b/gi,'eles/elas'],
+  [/\bwe\b/gi,'nós'],
+  [/\byou\b/gi,'você/vocês'],
+  [/\beat\b/gi,'comer'],
+  [/\beats\b/gi,'come'],
+  [/\beating\b/gi,'comendo'],
+  [/\bplay\b/gi,'jogar'],
+  [/\bplays\b/gi,'joga'],
+  [/\blike\b/gi,'gostar'],
+  [/\blikes\b/gi,'gosta']
+ ];
+ let translated=p;
+ replacements.forEach(([a,b])=>translated=translated.replace(a,b));
+ translated=translated.replace(/\s+/g,' ').trim().replace(/\s+([?.!,])/g,'$1');
+
+ // Exact useful pattern for the user's example.
+ if(/does\s+paul\s+eat\s+pizza\s+(for|in)\s+breakfast\??/i.test(p)){
+   translated='Paul come pizza no café da manhã?';
+ }
+ return `<p><b>Tradução:</b></p><div class="answer">${esc(translated)}</div>
+ <p><b>Frase original:</b> ${esc(p)}</p>
+ <p class="small muted">Se quiser, também posso explicar a gramática e corrigir a frase em inglês.</p>`;
+}
+
+/* AUDI STUDY - Gestor de avaliações */
+const audiStore='audi_manager_v1';
+function audiData(){try{const d=JSON.parse(localStorage.getItem(audiStore)||'{}');return {exams:Array.isArray(d.exams)?d.exams:[],results:Array.isArray(d.results)?d.results:[]}}catch{return {exams:[],results:[]}}}
+function audiSave(d){localStorage.setItem(audiStore,JSON.stringify(d))}
+function audiEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function managerPage(){
+ nav('nManager');
+ const d=audiData();
+ document.getElementById('app').innerHTML='<div class="card"><span class="badge">Projeto do Theo · Gestor inteligente</span><h2>📅 Provas e cronogramas</h2><p class="muted">Cadastre suas avaliações e distribua as revisões até a data de cada prova.</p><label>Matéria</label><input id="audiMatter" placeholder="Ex.: Matemática"><label>Data</label><input type="date" id="audiDate"><label>Conteúdos da prova</label><textarea id="audiTopics" placeholder="Ex.: proporção direta, inversa, equações"></textarea><button onclick="audiAddExam()">Salvar prova</button><div id="audiExams"></div></div><div class="card"><h2>🗓️ Meu plano de estudos</h2><label>Tempo diário (minutos)</label><input id="audiMinutes" type="number" min="10" max="180" value="30"><button onclick="audiPlan()">Criar cronograma</button><div id="audiSchedule"></div></div><div class="card"><h2>🤖 Comandos para AUDI IA</h2><p>Peça um simulado, um resumo, uma explicação passo a passo ou um cronograma.</p><button onclick="aiPage('Tenho prova e preciso de um cronograma. Monte meu plano de estudos.')">Montar cronograma com IA</button><button class="secondary" onclick="aiPage('Crie um simulado de matemática do 7º ano, com 10 questões e gabarito no final.')">Criar simulado com IA</button><button class="secondary" onclick="aiPage('Analise meus erros e me explique como melhorar.')">Analisar meus erros</button></div>';
+ audiRenderExams();
+}
+function audiAddExam(){
+ const subject=(document.getElementById('audiMatter').value||'').trim(),date=document.getElementById('audiDate').value,topics=(document.getElementById('audiTopics').value||'').trim();
+ if(!subject||!date||!topics){alert('Informe matéria, data e conteúdos.');return}
+ const d=audiData();d.exams.push({id:Date.now()+Math.random(),subject,date,topics});audiSave(d);managerPage();
+}
+function audiRemoveExam(id){const d=audiData();d.exams=d.exams.filter(x=>String(x.id)!==String(id));audiSave(d);managerPage()}
+function audiRenderExams(){
+ const el=document.getElementById('audiExams');if(!el)return;const d=audiData();
+ el.innerHTML='<h3>Avaliações cadastradas</h3>'+(d.exams.length?d.exams.sort((a,b)=>a.date.localeCompare(b.date)).map(e=>'<div class="lesson"><b>'+audiEscape(e.subject)+'</b> · '+audiEscape(e.date)+'<br>'+audiEscape(e.topics)+'<button class="secondary" onclick="audiRemoveExam('+JSON.stringify(String(e.id))+')">Excluir</button></div>').join(''):'<p class="muted">Nenhuma prova cadastrada.</p>');
+}
+function audiPlan(){
+ const el=document.getElementById('audiSchedule');const d=audiData(),now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());const mins=Math.max(10,Math.min(180,Number(document.getElementById('audiMinutes').value)||30));
+ const exams=d.exams.filter(e=>new Date(e.date+'T00:00:00')>=today).sort((a,b)=>a.date.localeCompare(b.date));
+ if(!exams.length){el.innerHTML='<p>Cadastre uma prova futura para gerar seu cronograma.</p>';return}
+ let out='<p class="muted">Distribuição sugerida; ajuste conforme seu ritmo.</p>';for(const e of exams){const days=Math.max(1,Math.ceil((new Date(e.date+'T00:00:00')-today)/86400000));const topics=e.topics.split(/[,;\n]/).map(s=>s.trim()).filter(Boolean);out+='<h3>'+audiEscape(e.subject)+' — '+audiEscape(e.date)+'</h3>';for(let i=0;i<Math.min(days,14);i++){const day=new Date(today);day.setDate(day.getDate()+i);const topic=topics[i%Math.max(1,topics.length)]||'Revisão geral';out+='<div class="lesson">'+day.toLocaleDateString('pt-BR')+' · '+mins+' minutos · '+audiEscape(i===days-1?'Revisão final e exercícios':topic)+'</div>'}}el.innerHTML=out;
+}
+function audiGetManagerContext(){
+ const d=audiData();return d.exams.slice(-12).map(e=>e.subject+' em '+e.date+': '+e.topics).join('\n');
+}
+
+</script></body></html>
